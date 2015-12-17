@@ -1,0 +1,23 @@
+sudo: false
+
+comiler:
+    - clang
+    - gcc
+
+git:
+    submodules: false
+
+addons:
+    apt:
+        packages:
+            - cmake
+
+before_install:
+    - git submodule update --init --recursive
+
+script:
+    - mkdir build
+    - cd build
+    - cmake ../
+    - make
+    - ./tests/bedrockTests
