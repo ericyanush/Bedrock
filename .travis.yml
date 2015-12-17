@@ -1,19 +1,29 @@
 sudo: false
 
-comiler:
-    - clang
+compiler:
     - gcc
+    - clang
 
 git:
     submodules: false
 
 addons:
     apt:
+        sources:
+            - llvm-toolchain-precise
+            - ubuntu-toolchain-r-test
         packages:
             - cmake
+            - clang-3.7
+            - g++-5
+            - gcc-5
 
 before_install:
     - git submodule update --init --recursive
+
+install:
+    - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
+    - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.7" CC="clang-3.7"; fi
 
 script:
     - mkdir build
