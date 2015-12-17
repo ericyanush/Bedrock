@@ -10,11 +10,11 @@ git:
 addons:
     apt:
         sources:
-            - llvm-toolchain-precise
+            - llvm-toolchain-precise-3.6
             - ubuntu-toolchain-r-test
         packages:
             - cmake
-            - clang-3.7
+            - clang-3.6
             - g++-5
             - gcc-5
 
