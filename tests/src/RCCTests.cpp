@@ -77,3 +77,4 @@ TEST_F(RCCTest, TestEnableGPIOPortClocks) {
     rcc->enableGPIOH();
     ASSERT_EQ((ENABLE<<16), rcc->AHBENR);
 }
+
