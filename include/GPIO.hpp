@@ -26,7 +26,10 @@ public:
     dev_reg AFL;
     dev_reg AFH;
     dev_reg BR;
+    
+private:
 };
+
 
 enum class PinMode : uint32_t {
     input         = 0b00,
@@ -53,50 +56,54 @@ enum class IOPullType : uint32_t {
 };
 
 
-template <uint8_t pin>
+/**
+ * Typdef a function type to return instance of GPIOPort
+ * We add a level of indirection here to allow for easy mock testing
+ */
+
+typedef GPIOPort* (GPIOPortProvider)(void);
+
+template <GPIOPortProvider port, uint8_t pin>
 class GPIOPin {
 private:
     static_assert(pin >= 0 && pin <= 15, "Pin Number out of range!");
-    GPIOPort* port;
 public:
-    GPIOPin(GPIOPort* port) { this->port = port; }
-    
-    void setMode(PinMode mode) {
+    static void setMode(PinMode mode) {
         constexpr uint32_t modeShift = pin * 2;
         
         //clear the current config
-        this->port->MODE &= ~(0b11 << modeShift);
-        this->port->MODE |= (static_cast<uint32_t>(mode) << modeShift);
+        port()->MODE &= ~(0b11 << modeShift);
+        port()->MODE |= (static_cast<uint32_t>(mode) << modeShift);
     }
-    void setOutSpeed(OutputSpeed speed) {
+    static void setOutSpeed(OutputSpeed speed) {
         constexpr uint32_t speedShift = pin * 2;
-        port->OSPEED &= ~(0b11 << speedShift);
-        port->OSPEED |= static_cast<uint32_t>(speed) << speedShift;
+        port()->OSPEED &= ~(0b11 << speedShift);
+        port()->OSPEED |= static_cast<uint32_t>(speed) << speedShift;
     }
-    void setOutputType(OutputType type) {
-        port->OTYPE &= ~(1 << pin);
-        port->OTYPE |= static_cast<uint32_t>(type) << pin;
+    static void setOutputType(OutputType type) {
+        port()->OTYPE &= ~(1 << pin);
+        port()->OTYPE |= static_cast<uint32_t>(type) << pin;
     }
-    void setPullType(IOPullType type) {
+    static void setPullType(IOPullType type) {
         constexpr uint32_t pullShift = pin * 2;
-        port->PUPD &= ~(0b11 << pullShift);
-        port->PUPD |= static_cast<uint32_t>(type) << pullShift;
+        port()->PUPD &= ~(0b11 << pullShift);
+        port()->PUPD |= static_cast<uint32_t>(type) << pullShift;
     }
 
-    bool isOn() {
-        return (port->ODR >> pin) & 0x1;
+    static bool isOn() {
+        return (port()->ODR >> pin) & 0x1;
     }
     
-    void on() {
-        port->ODR |= (1 << pin);
+    static void on() {
+        port()->ODR |= (1 << pin);
     }
-    void off() {
-        port->ODR &= ~(1 << pin);
+    static void off() {
+        port()->ODR &= ~(1 << pin);
     }
-    void toggle() {
-        port->ODR ^= (1 << pin);
+    static void toggle() {
+        port()->ODR ^= (1 << pin);
     }
-
+    
 };
 
 
