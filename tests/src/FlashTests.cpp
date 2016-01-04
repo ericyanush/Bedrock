@@ -51,6 +51,7 @@ TEST_F(FlashTest, TestPrefetchEnable) {
 }
 
 TEST_F(FlashTest, TestPrefetchDisable) {
+    flash->AC = 0;
     flash->AC |= (1 << 4);
     flash->disablePrefetch();
     ASSERT_EQ(0, flash->AC);
