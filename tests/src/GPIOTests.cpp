@@ -21,36 +21,55 @@ protected:
 };
 
 TEST_F(GPIOTest, TestGPIOPortLayout) {
-    ASSERT_EQ(0x00, offsetof(GPIOPort, MODE));
-    ASSERT_EQ(0x04, offsetof(GPIOPort, OTYPE));
-    ASSERT_EQ(0x08, offsetof(GPIOPort, OSPEED));
-    ASSERT_EQ(0x0C, offsetof(GPIOPort, PUPD));
-    ASSERT_EQ(0x10, offsetof(GPIOPort, IDR));
-    ASSERT_EQ(0x14, offsetof(GPIOPort, ODR));
-    ASSERT_EQ(0x18, offsetof(GPIOPort, BSR));
-    ASSERT_EQ(0x1C, offsetof(GPIOPort, LCK));
-    ASSERT_EQ(0x20, offsetof(GPIOPort, AFL));
-    ASSERT_EQ(0x24, offsetof(GPIOPort, AFH));
-    ASSERT_EQ(0x28, offsetof(GPIOPort, BR));
+    ASSERT_EQ(0x00, offsetof(GPIO::GPIOPort, MODE));
+    ASSERT_EQ(0x04, offsetof(GPIO::GPIOPort, OTYPE));
+    ASSERT_EQ(0x08, offsetof(GPIO::GPIOPort, OSPEED));
+    ASSERT_EQ(0x0C, offsetof(GPIO::GPIOPort, PUPD));
+    ASSERT_EQ(0x10, offsetof(GPIO::GPIOPort, IDR));
+    ASSERT_EQ(0x14, offsetof(GPIO::GPIOPort, ODR));
+    ASSERT_EQ(0x18, offsetof(GPIO::GPIOPort, BSR));
+    ASSERT_EQ(0x1C, offsetof(GPIO::GPIOPort, LCK));
+    ASSERT_EQ(0x20, offsetof(GPIO::GPIOPort, AFL));
+    ASSERT_EQ(0x24, offsetof(GPIO::GPIOPort, AFH));
+    ASSERT_EQ(0x28, offsetof(GPIO::GPIOPort, BR));
 }
 
 TEST_F(GPIOTest, TestModeTypes) {
-    ASSERT_EQ(0b00, static_cast<uint32_t>(PinMode::input));
-    ASSERT_EQ(0b01, static_cast<uint32_t>(PinMode::output));
-    ASSERT_EQ(0b10, static_cast<uint32_t>(PinMode::alternateFunc));
-    ASSERT_EQ(0b11, static_cast<uint32_t>(PinMode::analog));
+    ASSERT_EQ(0b00, static_cast<uint32_t>(GPIO::PinMode::input));
+    ASSERT_EQ(0b01, static_cast<uint32_t>(GPIO::PinMode::output));
+    ASSERT_EQ(0b10, static_cast<uint32_t>(GPIO::PinMode::alternateFunc));
+    ASSERT_EQ(0b11, static_cast<uint32_t>(GPIO::PinMode::analog));
 }
 
 TEST_F(GPIOTest, TestOuputSpeedTypes) {
-    ASSERT_EQ(0b00, static_cast<uint32_t>(OutputSpeed::low));
-    ASSERT_EQ(0b01, static_cast<uint32_t>(OutputSpeed::medium));
-    ASSERT_EQ(0b11, static_cast<uint32_t>(OutputSpeed::high));
+    ASSERT_EQ(0b00, static_cast<uint32_t>(GPIO::OutputSpeed::low));
+    ASSERT_EQ(0b01, static_cast<uint32_t>(GPIO::OutputSpeed::medium));
+    ASSERT_EQ(0b11, static_cast<uint32_t>(GPIO::OutputSpeed::high));
 }
 
 TEST_F(GPIOTest, TestIOPullTypes) {
-    ASSERT_EQ(0b00, static_cast<uint32_t>(IOPullType::none));
-    ASSERT_EQ(0b01, static_cast<uint32_t>(IOPullType::up));
-    ASSERT_EQ(0b10, static_cast<uint32_t>(IOPullType::down));
+    ASSERT_EQ(0b00, static_cast<uint32_t>(GPIO::IOPullType::none));
+    ASSERT_EQ(0b01, static_cast<uint32_t>(GPIO::IOPullType::up));
+    ASSERT_EQ(0b10, static_cast<uint32_t>(GPIO::IOPullType::down));
+}
+
+TEST_F(GPIOTest, TestAlternateFunctinonTypes) {
+    ASSERT_EQ(0, static_cast<uint32_t>(GPIO::AlternateFunction::AF0));
+    ASSERT_EQ(1, static_cast<uint32_t>(GPIO::AlternateFunction::AF1));
+    ASSERT_EQ(2, static_cast<uint32_t>(GPIO::AlternateFunction::AF2));
+    ASSERT_EQ(3, static_cast<uint32_t>(GPIO::AlternateFunction::AF3));
+    ASSERT_EQ(4, static_cast<uint32_t>(GPIO::AlternateFunction::AF4));
+    ASSERT_EQ(5, static_cast<uint32_t>(GPIO::AlternateFunction::AF5));
+    ASSERT_EQ(6, static_cast<uint32_t>(GPIO::AlternateFunction::AF6));
+    ASSERT_EQ(7, static_cast<uint32_t>(GPIO::AlternateFunction::AF7));
+    ASSERT_EQ(8, static_cast<uint32_t>(GPIO::AlternateFunction::AF8));
+    ASSERT_EQ(9, static_cast<uint32_t>(GPIO::AlternateFunction::AF9));
+    ASSERT_EQ(10, static_cast<uint32_t>(GPIO::AlternateFunction::AF10));
+    ASSERT_EQ(11, static_cast<uint32_t>(GPIO::AlternateFunction::AF11));
+    ASSERT_EQ(12, static_cast<uint32_t>(GPIO::AlternateFunction::AF12));
+    ASSERT_EQ(13, static_cast<uint32_t>(GPIO::AlternateFunction::AF13));
+    ASSERT_EQ(14, static_cast<uint32_t>(GPIO::AlternateFunction::AF14));
+    ASSERT_EQ(15, static_cast<uint32_t>(GPIO::AlternateFunction::AF15));
 }
 
 class GPIOPinTest : public ::testing::Test {
@@ -62,127 +81,127 @@ protected:
     virtual void TearDown() {
     }
     
-    static GPIOPort testPort;
-    static GPIOPort* fakePort() {
-        return &testPort;
+    static GPIO::GPIOPort testPort;
+    static GPIO::GPIOPort& fakePort() {
+        return testPort;
     }
     
-    GPIOPin<fakePort, 0> zero;
-    GPIOPin<fakePort, 1> one;
-    GPIOPin<fakePort, 2> two;
-    GPIOPin<fakePort, 3> three;
-    GPIOPin<fakePort, 4> four;
-    GPIOPin<fakePort, 5> five;
-    GPIOPin<fakePort, 6> six;
-    GPIOPin<fakePort, 7> seven;
-    GPIOPin<fakePort, 8> eight;
-    GPIOPin<fakePort, 9> nine;
-    GPIOPin<fakePort, 10> ten;
-    GPIOPin<fakePort, 11> eleven;
-    GPIOPin<fakePort, 12> twelve;
-    GPIOPin<fakePort, 13> thirteen;
-    GPIOPin<fakePort, 14> fourteen;
-    GPIOPin<fakePort, 15> fifteen;
+    GPIO::GPIOPin<fakePort, 0> zero;
+    GPIO::GPIOPin<fakePort, 1> one;
+    GPIO::GPIOPin<fakePort, 2> two;
+    GPIO::GPIOPin<fakePort, 3> three;
+    GPIO::GPIOPin<fakePort, 4> four;
+    GPIO::GPIOPin<fakePort, 5> five;
+    GPIO::GPIOPin<fakePort, 6> six;
+    GPIO::GPIOPin<fakePort, 7> seven;
+    GPIO::GPIOPin<fakePort, 8> eight;
+    GPIO::GPIOPin<fakePort, 9> nine;
+    GPIO::GPIOPin<fakePort, 10> ten;
+    GPIO::GPIOPin<fakePort, 11> eleven;
+    GPIO::GPIOPin<fakePort, 12> twelve;
+    GPIO::GPIOPin<fakePort, 13> thirteen;
+    GPIO::GPIOPin<fakePort, 14> fourteen;
+    GPIO::GPIOPin<fakePort, 15> fifteen;
 };
- GPIOPort GPIOPinTest::testPort;
+ GPIO::GPIOPort GPIOPinTest::testPort;
 
 
 TEST_F(GPIOPinTest, TestSetMode) {
     
     testPort.MODE = 0;
-    zero.setMode(PinMode::analog);
-    ASSERT_EQ(static_cast<uint32_t>(PinMode::analog) << 0, testPort.MODE);
+    zero.setMode(GPIO::PinMode::analog);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::PinMode::analog) << 0, testPort.MODE);
     //Ensure we handle changes correctly, and zero out the mode for the port on change
-    zero.setMode(PinMode::output);
-    ASSERT_EQ(static_cast<uint32_t>(PinMode::output), testPort.MODE);
+    zero.setMode(GPIO::PinMode::output);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::PinMode::output), testPort.MODE);
     
     testPort.MODE = 0;
-    one.setMode(PinMode::analog);
-    ASSERT_EQ(static_cast<uint32_t>(PinMode::analog) << 2, testPort.MODE);
+    one.setMode(GPIO::PinMode::analog);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::PinMode::analog) << 2, testPort.MODE);
     
     testPort.MODE = 0;
-    seven.setMode(PinMode::analog);
-    ASSERT_EQ(static_cast<uint32_t>(PinMode::analog) << 14, testPort.MODE);
+    seven.setMode(GPIO::PinMode::analog);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::PinMode::analog) << 14, testPort.MODE);
     
     testPort.MODE = 0;
-    fourteen.setMode(PinMode::analog);
-    ASSERT_EQ(static_cast<uint32_t>(PinMode::analog) << 28, testPort.MODE);
+    fourteen.setMode(GPIO::PinMode::analog);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::PinMode::analog) << 28, testPort.MODE);
     
     testPort.MODE = 0;
-    fifteen.setMode(PinMode::analog);
-    ASSERT_EQ(static_cast<uint32_t>(PinMode::analog) << 30, testPort.MODE);
+    fifteen.setMode(GPIO::PinMode::analog);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::PinMode::analog) << 30, testPort.MODE);
 }
 
 TEST_F(GPIOPinTest, TestSetOutputSpeed) {
     testPort.OSPEED = 0;
-    zero.setOutSpeed(OutputSpeed::medium);
-    ASSERT_EQ(static_cast<uint32_t>(OutputSpeed::medium), testPort.OSPEED);
+    zero.setOutSpeed(GPIO::OutputSpeed::medium);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::OutputSpeed::medium), testPort.OSPEED);
     
     testPort.OSPEED = 0;
-    one.setOutSpeed(OutputSpeed::high);
-    ASSERT_EQ(static_cast<uint32_t>(OutputSpeed::high) << 2, testPort.OSPEED);
+    one.setOutSpeed(GPIO::OutputSpeed::high);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::OutputSpeed::high) << 2, testPort.OSPEED);
     
     testPort.OSPEED = 0;
     //ensure we correctly clear bits
-    seven.setOutSpeed(OutputSpeed::high);
-    seven.setOutSpeed(OutputSpeed::low);
-    ASSERT_EQ(static_cast<uint32_t>(OutputSpeed::low) << 14, testPort.OSPEED);
+    seven.setOutSpeed(GPIO::OutputSpeed::high);
+    seven.setOutSpeed(GPIO::OutputSpeed::low);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::OutputSpeed::low) << 14, testPort.OSPEED);
     
     testPort.OSPEED = 0;
-    fourteen.setOutSpeed(OutputSpeed::medium);
-    ASSERT_EQ(static_cast<uint32_t>(OutputSpeed::medium) << 28, testPort.OSPEED);
+    fourteen.setOutSpeed(GPIO::OutputSpeed::medium);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::OutputSpeed::medium) << 28, testPort.OSPEED);
     
     testPort.OSPEED = 0;
-    fifteen.setOutSpeed(OutputSpeed::high);
-    ASSERT_EQ(static_cast<uint32_t>(OutputSpeed::high) << 30, testPort.OSPEED);
+    fifteen.setOutSpeed(GPIO::OutputSpeed::high);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::OutputSpeed::high) << 30, testPort.OSPEED);
 }
 
 TEST_F(GPIOPinTest, TestSetOutputType) {
     testPort.OTYPE = 0;
-    zero.setOutputType(OutputType::opendrain);
-    ASSERT_EQ(static_cast<uint32_t>(OutputType::opendrain), testPort.OTYPE);
+    zero.setOutputType(GPIO::OutputType::opendrain);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::OutputType::opendrain), testPort.OTYPE);
     
     testPort.OTYPE = 0;
-    one.setOutputType(OutputType::opendrain);
-    ASSERT_EQ(static_cast<uint32_t>(OutputType::opendrain) << 1, testPort.OTYPE);
+    one.setOutputType(GPIO::OutputType::opendrain);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::OutputType::opendrain) << 1, testPort.OTYPE);
     
     testPort.OTYPE = 0;
     //ensure we correctly clear bits
-    seven.setOutputType(OutputType::opendrain);
-    seven.setOutputType(OutputType::pushpull);
-    ASSERT_EQ(static_cast<uint32_t>(OutputType::pushpull) << 7, testPort.OTYPE);
+    seven.setOutputType(GPIO::OutputType::opendrain);
+    seven.setOutputType(GPIO::OutputType::pushpull);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::OutputType::pushpull) << 7, testPort.OTYPE);
     
     testPort.OTYPE = 0;
-    fourteen.setOutputType(OutputType::opendrain);
-    ASSERT_EQ(static_cast<uint32_t>(OutputType::opendrain) << 14, testPort.OTYPE);
+    fourteen.setOutputType(GPIO::OutputType::opendrain);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::OutputType::opendrain) << 14, testPort.OTYPE);
     
     testPort.OTYPE = 0;
-    fifteen.setOutputType(OutputType::opendrain);
-    ASSERT_EQ(static_cast<uint32_t>(OutputType::opendrain) << 15, testPort.OTYPE);
+    fifteen.setOutputType(GPIO::OutputType::opendrain);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::OutputType::opendrain) << 15, testPort.OTYPE);
 }
 
 TEST_F(GPIOPinTest, TestSetPullType) {
     testPort.PUPD = 0;
-    zero.setPullType(IOPullType::down);
-    ASSERT_EQ(static_cast<uint32_t>(IOPullType::down), testPort.PUPD);
+    zero.setPullType(GPIO::IOPullType::down);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::IOPullType::down), testPort.PUPD);
     
     testPort.PUPD = 0;
-    one.setPullType(IOPullType::up);
-    ASSERT_EQ(static_cast<uint32_t>(IOPullType::up) << 2, testPort.PUPD);
+    one.setPullType(GPIO::IOPullType::up);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::IOPullType::up) << 2, testPort.PUPD);
     
     testPort.PUPD = 0;
     //ensure we correctly clear bits
-    seven.setPullType(IOPullType::up);
-    seven.setPullType(IOPullType::none);
-    ASSERT_EQ(static_cast<uint32_t>(IOPullType::none) << 14, testPort.PUPD);
+    seven.setPullType(GPIO::IOPullType::up);
+    seven.setPullType(GPIO::IOPullType::none);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::IOPullType::none) << 14, testPort.PUPD);
     
     testPort.PUPD = 0;
-    fourteen.setPullType(IOPullType::down);
-    ASSERT_EQ(static_cast<uint32_t>(IOPullType::down) << 28, testPort.PUPD);
+    fourteen.setPullType(GPIO::IOPullType::down);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::IOPullType::down) << 28, testPort.PUPD);
     
     testPort.PUPD = 0;
-    fifteen.setPullType(IOPullType::down);
-    ASSERT_EQ(static_cast<uint32_t>(IOPullType::down) << 30, testPort.PUPD);
+    fifteen.setPullType(GPIO::IOPullType::down);
+    ASSERT_EQ(static_cast<uint32_t>(GPIO::IOPullType::down) << 30, testPort.PUPD);
 }
 
 TEST_F(GPIOPinTest, TestSetOn) {

@@ -9,7 +9,7 @@
 #ifndef RCC_h
 #define RCC_h
 
-#include "types.h"
+#include "types.hpp"
 #include "Flash.hpp"
 #include "stm32f303xe.h"
 
@@ -53,8 +53,8 @@ public:
         CFG |= RCC_CFGR_PPRE2_DIV1; // Set APB2 prescaler to 1 (72MHz)
         
         //Setup the flash latency
-        flash()->setLatency(FlashWait::two); //Set the flash latency to 2WS
-        flash()->enablePrefetch(); // Enable the flash prefetch buffer
+        flash().setLatency(FlashWait::two); //Set the flash latency to 2WS
+        flash().enablePrefetch(); // Enable the flash prefetch buffer
         
         //Enable the PLL and wait for it to be ready
         CR |= RCC_CR_PLLON;
@@ -99,19 +99,19 @@ public:
         AHBENR |= (ENABLE << 16);
     }
     
-    dev_reg CR;
-    dev_reg CFG;
-    dev_reg CI;
-    dev_reg APB2RST;
-    dev_reg APB1RST;
-    dev_reg AHBENR;
-    dev_reg APB2ENR;
-    dev_reg APB1ENR;
-    dev_reg BDC;
-    dev_reg CSR;
-    dev_reg AHBRST;
-    dev_reg CFG2;
-    dev_reg CFG3;
+    dev_reg32_t CR;
+    dev_reg32_t CFG;
+    dev_reg32_t CI;
+    dev_reg32_t APB2RST;
+    dev_reg32_t APB1RST;
+    dev_reg32_t AHBENR;
+    dev_reg32_t APB2ENR;
+    dev_reg32_t APB1ENR;
+    dev_reg32_t BDC;
+    dev_reg32_t CSR;
+    dev_reg32_t AHBRST;
+    dev_reg32_t CFG2;
+    dev_reg32_t CFG3;
 };
 
 

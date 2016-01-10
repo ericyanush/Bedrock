@@ -10,7 +10,7 @@
 #define Flash_h
 
 #include <stdint.h>
-#include "types.h"
+#include "types.hpp"
 #include "stm32f303xe.h"
 
 enum class FlashWait : uint8_t {
@@ -36,16 +36,16 @@ public:
         AC &= ~FLASH_ACR_PRFTBE;
     }
     
-    dev_reg AC;
-    dev_reg KEY;
-    dev_reg OPTKEY;
-    dev_reg SR;
-    dev_reg CR;
-    dev_reg AR;
-    dev_reg OB;
-    dev_reg WRP;
+    dev_reg32_t AC;
+    dev_reg32_t KEY;
+    dev_reg32_t OPTKEY;
+    dev_reg32_t SR;
+    dev_reg32_t CR;
+    dev_reg32_t AR;
+    dev_reg32_t OB;
+    dev_reg32_t WRP;
 };
 
-typedef Flash* (FlashProvider)(void);
+using FlashProvider = Flash& (*)(void);
 
 #endif /* Flash_h */

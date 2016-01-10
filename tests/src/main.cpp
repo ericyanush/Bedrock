@@ -7,6 +7,7 @@
 //
 
 #include "gtest/gtest.h"
+#include "bxCAN.hpp"
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);

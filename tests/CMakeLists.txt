@@ -9,7 +9,10 @@ add_subdirectory(googletest)
 set(BEDROCK_TEST_SRCS src/main.cpp
 					  src/RCCTests.cpp
 					  src/GPIOTests.cpp
-					  src/FlashTests.cpp)
+					  src/FlashTests.cpp
+					  src/bxCANTests.cpp
+                      src/SystemControlTests.cpp
+                      src/NVICTests.cpp)
 
 #Include the bedrock headers
 include_directories(../include)

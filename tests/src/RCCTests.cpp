@@ -105,7 +105,3 @@ TEST_F(RCCTest, TestInit) {
     ASSERT_EQ(0, rcc->CFG3);
     ASSERT_EQ(0, rcc->CI);
 }
-
-TEST_F(RCCTest, TestconfigSystemClock) {
-    
-}
