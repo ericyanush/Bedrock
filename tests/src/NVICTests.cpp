@@ -21,15 +21,23 @@ enum class Irq : int32_t {
     SixyThree = 63
 };
 
+/**
+ Note: upon initializtion of the test fixture, the nvic member object is initialized
+ to all zeros. The nvicIsInInitState function checks to see if the nvic member object
+ is still all zeros.
+ */
 class NVICTests : public testing::Test {
     
 protected:
-};
-
-TEST_F(NVICTests, TestEnableIrq) {
     NVIC nvic{0};
     const NVIC untouched{0};
     
+    bool nvicIsInInitState() {
+        return (memcmp(&nvic, &untouched, sizeof(NVIC)) == 0);
+    }
+};
+
+TEST_F(NVICTests, TestEnableIrq) {
     nvic.enableIrq<Irq::Three>();
     
     //Cast the interrupt to it's underlying number
@@ -40,13 +48,10 @@ TEST_F(NVICTests, TestEnableIrq) {
     ASSERT_EQ(1 << bitOffset, nvic.ISER[regNumber]);
     
     nvic.ISER[regNumber] = 0;
-    ASSERT_EQ(0, memcmp(&untouched, &nvic, sizeof(NVIC)));
+    ASSERT_EQ(true, nvicIsInInitState());
 }
 
 TEST_F(NVICTests, TestDisableIrq) {
-    NVIC nvic{0};
-    const NVIC untouched{0};
-    
     nvic.disableIrq<Irq::SixyThree>();
     
     //Cast the interrupt to it's underlying number
@@ -56,23 +61,18 @@ TEST_F(NVICTests, TestDisableIrq) {
     
     ASSERT_EQ(1 << bitOffset, nvic.ICER[regNumber]);
     nvic.ICER[regNumber] = 0;
-    ASSERT_EQ(0, memcmp(&untouched, &nvic, sizeof(NVIC)));
+    ASSERT_EQ(true, nvicIsInInitState());
 }
 
 TEST_F(NVICTests, TestSetPriority) {
-    NVIC nvic{0};
-    const NVIC untouched{0};
-    
     nvic.setIrqPriority<Irq::ThirtyOne>(12);
     constexpr uint32_t intNum = static_cast<uint32_t>(Irq::ThirtyOne);
     ASSERT_EQ(12, nvic.IPR[intNum]);
     nvic.IPR[intNum] = 0;
-    ASSERT_EQ(0, memcmp(&untouched, &nvic, sizeof(NVIC)));
+    ASSERT_EQ(true, nvicIsInInitState());
 }
 
 TEST_F(NVICTests, TestGetPriority) {
-    NVIC nvic{0};
-    
     constexpr uint32_t intNum = static_cast<uint32_t>(Irq::Five);
     nvic.IPR[intNum] = 21;
     ASSERT_EQ(21, nvic.getIrqPriority<Irq::Five>());
