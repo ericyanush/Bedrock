@@ -78,6 +78,12 @@ TEST_F(RCCTest, TestEnableGPIOPortClocks) {
     ASSERT_EQ((ENABLE<<16), rcc->AHBENR);
 }
 
+TEST_F(RCCTest, TestEnableCANClock) {
+    rcc->APB1ENR = DISABLE;
+    rcc->enableCAN();
+    ASSERT_EQ((ENABLE<<25), rcc->APB1ENR);
+}
+
 TEST_F(RCCTest, TestInit) {
     // The init function should:
     //  - Ensure the HSI clock is enabled
