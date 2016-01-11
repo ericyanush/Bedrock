@@ -7,18 +7,19 @@ add_subdirectory(googletest)
 
 #List all test sources
 set(BEDROCK_TEST_SRCS src/main.cpp
-					  src/RCCTests.cpp
-					  src/GPIOTests.cpp
-					  src/FlashTests.cpp
-					  src/bxCANTests.cpp
+                      src/RCCTests.cpp
+                      src/GPIOTests.cpp
+                      src/FlashTests.cpp
+                      src/bxCANTests.cpp
                       src/SystemControlTests.cpp
-                      src/NVICTests.cpp)
+                      src/NVICTests.cpp
+                      src/SysTickTests.cpp)
 
 #Include the bedrock headers
 include_directories(../include)
 #Include the googletests/mock paths
 include_directories(googletest/googletest/include
-					googletest/googlemock/include)
+                    googletest/googlemock/include)
 
 add_executable(${TEST_TARGET} ${BEDROCK_TEST_SRCS})
 target_link_libraries(${TEST_TARGET} gmock gtest)
