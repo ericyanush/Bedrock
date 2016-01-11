@@ -12,6 +12,7 @@
 #include <stdint.h>
 #include "types.hpp"
 #include "CANMessage.hpp"
+#include "RCC.hpp"
 
 namespace CAN {
     

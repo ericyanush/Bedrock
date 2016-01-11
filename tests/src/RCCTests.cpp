@@ -7,7 +7,7 @@
 //
 
 #include "gtest/gtest.h"
-#include "RCC.h"
+#include "RCC.hpp"
 
 class RCCTest : public ::testing::Test {
   

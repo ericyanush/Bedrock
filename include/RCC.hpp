@@ -99,6 +99,10 @@ public:
         AHBENR |= (ENABLE << 16);
     }
     
+    void enableCAN() {
+        APB1ENR |= (ENABLE << 25);
+    }
+    
     dev_reg32_t CR;
     dev_reg32_t CFG;
     dev_reg32_t CI;
@@ -114,5 +118,6 @@ public:
     dev_reg32_t CFG3;
 };
 
+using RCCProvider = RCC& (*)(void);
 
 #endif /* RCC_h */
