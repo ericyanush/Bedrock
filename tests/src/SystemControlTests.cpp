@@ -9,6 +9,11 @@
 #include "SystemControl.hpp"
 #include "gtest/gtest.h"
 
+/**
+ Note: upon initializtion of the test fixture, the scb member object is initialized
+ to all zeros. The scbIsInInitState function checks to see if the scb member object
+ is still all zeros.
+ */
 class SystemControlTest : public ::testing::Test {
     
 protected:
@@ -17,6 +22,13 @@ protected:
     }
     
     virtual void TearDown() {
+    }
+    
+    SystemControl scb{0};
+    const SystemControl untouched{0};
+    
+    bool scbIsInInitState() {
+        return (memcmp(&scb, &untouched, sizeof(SystemControl)) == 0);
     }
 };
 
@@ -40,37 +52,28 @@ TEST_F(SystemControlTest, TestRegisterLayout) {
 }
 
 TEST_F(SystemControlTest, TestSetVectorTableAddress) {
-    SystemControl control{0};
-    const SystemControl untouched{0};
-    
-    control.setVectorBaseAddress(0xABCDEF01);
-    ASSERT_EQ(0xABCDEF01, control.VTOR);
-    control.VTOR = 0;
-    ASSERT_EQ(0, memcmp(&untouched, &control, sizeof(SystemControl)));
+    scb.setVectorBaseAddress(0xABCDEF01);
+    ASSERT_EQ(0xABCDEF01, scb.VTOR);
+    scb.VTOR = 0;
+    ASSERT_EQ(true, scbIsInInitState());
 }
 
 TEST_F(SystemControlTest, TestGetVectorTableAddress) {
-    SystemControl control = {0};
-    control.VTOR = 0xABC123FF;
-    
-    ASSERT_EQ(0xABC123FF, control.getVectorBaseAddress());
+    scb.VTOR = 0xABC123FF;
+    ASSERT_EQ(0xABC123FF, scb.getVectorBaseAddress());
 }
 
 TEST_F(SystemControlTest, TestSetPriorityGroups) {
-    SystemControl control{0};
-    const SystemControl untouched{0};
-    
-    control.setPriorityGroups(PriorityGroupCount::Groups_8);
+    scb.setPriorityGroups(PriorityGroupCount::Groups_8);
     ASSERT_EQ(static_cast<uint32_t>(PriorityGroupCount::Groups_8),
-              (control.AIRCR >> 8) & 0b111); //Test the appropriate group value was set
-    ASSERT_EQ(0x05FA0000, control.AIRCR & 0xFFFF0000); // Ensure the VECT_KEY was written to enable the modification
-    control.AIRCR = 0;
-    ASSERT_EQ(0, memcmp(&untouched, &control, sizeof(SystemControl)));
+              (scb.AIRCR >> 8) & 0b111); //Test the appropriate group value was set
+    ASSERT_EQ(0x05FA0000, scb.AIRCR & 0xFFFF0000); // Ensure the VECT_KEY was written to enable the modification
+    scb.AIRCR = 0;
+    ASSERT_EQ(true, scbIsInInitState());
 }
 
 TEST_F(SystemControlTest, TestGetPriorityGroups) {
-    SystemControl control{0};
-    control.setPriorityGroups(PriorityGroupCount::Groups_4);
+    scb.setPriorityGroups(PriorityGroupCount::Groups_4);
     
-    ASSERT_EQ(PriorityGroupCount::Groups_4, control.getPriorityGroups());
+    ASSERT_EQ(PriorityGroupCount::Groups_4, scb.getPriorityGroups());
 }
