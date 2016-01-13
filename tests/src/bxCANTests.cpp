@@ -44,6 +44,10 @@ protected:
     virtual void TearDown() {
     }
     
+    bool canIsAllZeros() {
+        return memcmp(&untouched, &can, sizeof(CAN::CAN));
+    }
+    
     CAN::CAN can{0};
     CAN::CAN untouched{0};
     CANMessage testMessage;
@@ -382,4 +386,219 @@ TEST_F(CANTests, TestRecieveMessageFromFIFO) {
     for (uint8_t i = 0; i < 8; i++) {
         ASSERT_EQ(testMessage.data[i], retMessage.data[i]);
     }
+}
+
+TEST_F(CANTests, Test_tx0Complete) {
+    //All Zeros, should be false
+    ASSERT_FALSE(can.tx0Complete());
+    
+    can.TSR |= 1; //Set the completion flag
+    ASSERT_TRUE(can.tx0Complete());
+}
+
+TEST_F(CANTests, Test_ackTX0Complete) {
+    //Ensure the completion bit is zero; it is cleared by writing a 1
+    // In reality, it would already by 1, but we can't test for something that doesn't change
+    can.TSR = 0;
+    can.ackTX0Complete();
+    
+    ASSERT_TRUE((can.TSR & 0x1) == 0x1);
+}
+
+TEST_F(CANTests, Test_tx1Complete) {
+    //All Zeros, should be false
+    ASSERT_FALSE(can.tx1Complete());
+    
+    can.TSR |= 1 << 8; //Set the completion flag
+    ASSERT_TRUE(can.tx1Complete());
+}
+
+TEST_F(CANTests, Test_ackTX1Complete) {
+    //Ensure the completion bit is zero; it is cleared by writing a 1
+    // In reality, it would already by 1, but we can't test for something that doesn't change
+    can.TSR = 0;
+    can.ackTX1Complete();
+    
+    ASSERT_TRUE((can.TSR & (1 << 8)) == (1 << 8));
+}
+
+TEST_F(CANTests, Test_tx2Complete) {
+    //All Zeros, should be false
+    ASSERT_FALSE(can.tx2Complete());
+    
+    can.TSR |= 1 << 16; //Set the completion flag
+    ASSERT_TRUE(can.tx2Complete());
+}
+
+TEST_F(CANTests, Test_ackTX2Complete) {
+    //Ensure the completion bit is zero; it is cleared by writing a 1
+    // In reality, it would already by 1, but we can't test for something that doesn't change
+    can.TSR = 0;
+    can.ackTX2Complete();
+    
+    ASSERT_TRUE((can.TSR & (1 << 16)) == (1 << 16));
+}
+
+TEST_F(CANTests, Test_SleepInterruptOnOff) {
+    const uint32_t bitMask = 1 << 17;
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Ensure the interrupt is off
+    can.enableSleepInterrupt();
+    ASSERT_TRUE((can.IER & bitMask) == bitMask); //Should be on now
+    can.disableSleepInterrupt();
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Should be off again
+}
+
+TEST_F(CANTests, Test_WakeupInterruptOnOff) {
+    const uint32_t bitMask = 1 << 16;
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Ensure the interrupt is off
+    can.enableWakupInterrupt();
+    ASSERT_TRUE((can.IER & bitMask) == bitMask); //Should be on now
+    can.disableWakupInterrupt();
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Should be off again
+}
+
+TEST_F(CANTests, Test_ErrorInterruptOnOff) {
+    const uint32_t bitMask = 1 << 15;
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Ensure the interrupt is off
+    can.enableErrorInterrupt();
+    ASSERT_TRUE((can.IER & bitMask) == bitMask); //Should be on now
+    can.disableErrorInterrupt();
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Should be off again
+}
+
+TEST_F(CANTests, Test_LastErrorCodeInterruptOnOff) {
+    const uint32_t bitMask = 1 << 11;
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Ensure the interrupt is off
+    can.enableLastErrorCodeInterrupt();
+    ASSERT_TRUE((can.IER & bitMask) == bitMask); //Should be on now
+    can.disableLastErrorCodeInterrupt();
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Should be off again
+}
+
+TEST_F(CANTests, Test_BusOffInterruptOnOff) {
+    const uint32_t bitMask = 1 << 10;
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Ensure the interrupt is off
+    can.enableBusOffInterrupt();
+    ASSERT_TRUE((can.IER & bitMask) == bitMask); //Should be on now
+    can.disableBusOffInterrupt();
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Should be off again
+}
+
+TEST_F(CANTests, Test_ErrorPassiveInterruptOnOff) {
+    const uint32_t bitMask = 1 << 9;
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Ensure the interrupt is off
+    can.enableErrorPassiveInterrupt();
+    ASSERT_TRUE((can.IER & bitMask) == bitMask); //Should be on now
+    can.disableErrorPassiveInterrupt();
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Should be off again
+}
+
+TEST_F(CANTests, Test_ErrorWarningInterruptOnOff) {
+    const uint32_t bitMask = 1 << 8;
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Ensure the interrupt is off
+    can.enableErrorWarnInterrupt();
+    ASSERT_TRUE((can.IER & bitMask) == bitMask); //Should be on now
+    can.disableErrorWarnInterrupt();
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Should be off again
+}
+
+TEST_F(CANTests, Test_FIFO1OverrunInterruptOnOff) {
+    const uint32_t bitMask = 1 << 6;
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Ensure the interrupt is off
+    can.enableFIFO1OverrunInterrupt();
+    ASSERT_TRUE((can.IER & bitMask) == bitMask); //Should be on now
+    can.disableFIFO1OverrunInterrupt();
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Should be off again
+}
+
+TEST_F(CANTests, Test_FIFO1FullInterruptOnOff) {
+    const uint32_t bitMask = 1 << 5;
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Ensure the interrupt is off
+    can.enableFIFO1FullInterrupt();
+    ASSERT_TRUE((can.IER & bitMask) == bitMask); //Should be on now
+    can.disableFIFO1FullInterrupt();
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Should be off again
+}
+
+TEST_F(CANTests, Test_FIFO1MsgPendingInterruptOnOff) {
+    const uint32_t bitMask = 1 << 4;
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Ensure the interrupt is off
+    can.enableFIFO1MessagePendingInterrupt();
+    ASSERT_TRUE((can.IER & bitMask) == bitMask); //Should be on now
+    can.disableFIFO1MessagePendingInterrupt();
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Should be off again
+}
+
+TEST_F(CANTests, Test_FIFO0OverrunInterruptOnOff) {
+    const uint32_t bitMask = 1 << 3;
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Ensure the interrupt is off
+    can.enableFIFO0OverrunInterrupt();
+    ASSERT_TRUE((can.IER & bitMask) == bitMask); //Should be on now
+    can.disableFIFO0OverrunInterrupt();
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Should be off again
+}
+
+TEST_F(CANTests, Test_FIFO0FullInterruptOnOff) {
+    const uint32_t bitMask = 1 << 2;
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Ensure the interrupt is off
+    can.enableFIFO0FullInterrupt();
+    ASSERT_TRUE((can.IER & bitMask) == bitMask); //Should be on now
+    can.disableFIFO0FullInterrupt();
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Should be off again
+}
+
+TEST_F(CANTests, Test_FIFO0MsgPendingInterruptOnOff) {
+    const uint32_t bitMask = 1 << 1;
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Ensure the interrupt is off
+    can.enableFIFO0MessagePendingInterrupt();
+    ASSERT_TRUE((can.IER & bitMask) == bitMask); //Should be on now
+    can.disableFIFO0MessagePendingInterrupt();
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Should be off again
+}
+
+TEST_F(CANTests, Test_TXMailboxEmptyInterruptOnOff) {
+    const uint32_t bitMask = 1;
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Ensure the interrupt is off
+    can.enableTXMailboxEmptyInterrupt();
+    ASSERT_TRUE((can.IER & bitMask) == bitMask); //Should be on now
+    can.disableTXMailboxEmptyInterrupt();
+    ASSERT_FALSE((can.IER & bitMask) == bitMask); //Should be off again
+}
+
+TEST_F(CANTests, TestGetRXErrorCount) {
+    ASSERT_EQ(0, can.getCurrentRXErrorCount());
+    can.ESR = (101 << 24);
+    ASSERT_EQ(101, can.getCurrentRXErrorCount());
+}
+
+TEST_F(CANTests, TestGetTXErrorCount) {
+    ASSERT_EQ(0, can.getCurrentTXErrorCount());
+    can.ESR = (88 << 16);
+    ASSERT_EQ(88, can.getCurrentTXErrorCount());
+}
+
+TEST_F(CANTests, TestGetLastErrorCode) {
+    using ErrorCode = CAN::CAN::ErrorCode;
+    
+    ASSERT_EQ(ErrorCode::NoError, can.getLastErrorCode());
+    can.ESR = static_cast<uint8_t>(ErrorCode::BitDominantError) << 4;
+    ASSERT_EQ(ErrorCode::BitDominantError, can.getLastErrorCode());
+}
+
+TEST_F(CANTests, TestIsBusOffState) {
+    ASSERT_FALSE(can.isInBusOffState());
+    can.ESR = (1 << 2);
+    ASSERT_TRUE(can.isInBusOffState());
+}
+
+TEST_F(CANTests, TestIsInErrorWarningState) {
+    ASSERT_FALSE(can.isInErrorWarningState());
+    can.ESR = 1;
+    ASSERT_TRUE(can.isInErrorWarningState());
+}
+
+TEST_F(CANTests, TestIsInErrorPassiveState) {
+    ASSERT_FALSE(can.isInErrorPassiveState());
+    can.ESR = (1 << 1);
+    ASSERT_TRUE(can.isInErrorPassiveState());
 }

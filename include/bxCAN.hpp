@@ -34,6 +34,15 @@ namespace CAN {
     
     class Filters {
     public:
+        
+        enum class Mode : uint8_t {
+            Mask = 0,
+            List = 1
+        };
+        enum class Width: uint8_t {
+            Dual = 0,
+            Single = 1
+        };
         struct FilterBank {
             dev_reg32_t FR1;
             dev_reg32_t FR2;
@@ -60,8 +69,9 @@ namespace CAN {
     public:
         
         /**
-         enterInitMode: Method to put CAN peripheral in initialization mode
-         Note: This method will BLOCK until the hardware has signaled that it hase
+           Method to put CAN peripheral in initialization mode
+         
+           Note: This method will BLOCK until the hardware has signaled that it hase
                successfully entered init mode. (INAK bit in MSR is 1)
          */
         void enterInitMode() {
@@ -72,7 +82,8 @@ namespace CAN {
         }
         
         /**
-         exitInitMode: Method to put CAN peripheral in normal op mode
+         Method to put CAN peripheral into operational mode
+         
          Note: This method will BLOCK until the hardware has signaled that it hase
          successfully left init mode. (INAK bit in MSR is cleared)
          */
@@ -83,31 +94,50 @@ namespace CAN {
             while ((MSR & 0x1) == 0x1) {}
         }
         
+        /**
+           Collection of supported operational modes
+         
+           - Normal: Normal Operation Mode
+           - Silent: Will not Transmit anything on the bus. (TX Loopback)
+           - Loopback: Will not Recieve anything from the bus. (RX Loopback)
+           - SelfTest: Will not Transmit or Recieve from the bus. (RX + TX Loopback)
+         */
         enum class Mode : uint32_t {
             Normal   = 0b00,
-            //Silent Mode: Does not TX anything. (TX Loopback)
             Silent   = 0b10,
-            //Loopback Mode: Does not RX anything. (RX Loopback)
             Loopback = 0b01,
-            //Selftest: Does not RX or TX anything. (RX + TX Loopback)
-            SelfTest = 0b11,
+            SelfTest = 0b11
         };
         
         /**
-         Warning: Does not enter or exit init mode; needs to be done manually by caller
+          Method to change the bus operation mode.
+        
+          - parameter newOpMode: The bus operation mode to switch to.
+          
+          Warning: Does not enter or exit init mode; needs to be done manually by caller
          */
         void setMode_unsafe(const Mode newOpMode) {
             constexpr uint8_t modeBitShift = 30;
             BTR &= ~(0b11 << modeBitShift);
             BTR |= static_cast<uint32_t>(newOpMode) << modeBitShift;
         }
+        /**
+         Method to change the bus operation mode.
+         
+         - parameter freq: The bus operation frequency to switch to.
+         
+         Note: This method is safe to call; it automatically handles the
+         entrance to and exit from init mode.
+         */
         void setMode(const Mode newOpMode) {
             enterInitMode(); //BTR RO outside of init mode
             setMode_unsafe(newOpMode);
             exitInitMode();
         }
         
-        
+        /**
+          Collection of supported bus frequencies
+         */
         enum class BusFrequency : uint16_t {
             //Values are prescaler values using 12TQ
             //  They are PRE_VAL - 1 as the bxCAN adds 1 in hw
@@ -121,6 +151,13 @@ namespace CAN {
             KHz_10  = (300 - 1)
         };
         /**
+         Method to change the bus operation frequency.
+         
+         - parameter freq: The bus operation frequency to switch to.
+         
+         Note: This method is safe to call; it automatically handles the
+                entrance to and exit from init mode.
+         
          Note: this method is currently hardcoded to use an AHB1 clock of 36MHz
          */
         void setFrequency(const BusFrequency freq) {
@@ -130,7 +167,12 @@ namespace CAN {
         }
         
         /**
+         Method to change the bus operation frequency.
+         
+         - parameter freq: The bus operation frequency to switch to
+         
          Note: this method is currently hardcoded to use an AHB1 clock of 36MHz
+         
          Warning: This method does not enter or exit init mode, this must be done by the caller!
          */
         void setFrequency_unsafe(const BusFrequency freq) {
@@ -139,7 +181,10 @@ namespace CAN {
         }
         
         /**
-         init: Method to setup the CAN peripheral, sets up bit timings
+          Method to setup the CAN peripheral
+         
+          - Parameter freq: Bus operational frequency to use
+          - Parameter opMode: The operational mode to place the bus into
          */
         void init(const BusFrequency freq = BusFrequency::KHz_125, const Mode opMode = Mode::Normal) {
             enterInitMode();
@@ -168,22 +213,33 @@ namespace CAN {
             exitInitMode();
         }
         
-        
+        /**
+         Check if there is any avaialble TX mailboxes
+         
+         - Returns: bool; True if there are any available mailboxes, false otherwise
+         */
         bool availableTXMailbox() {
             //Check bits 26, 27, 28 (Mailbox Empty 0, 1, 2)
             return (TSR & 0x1C000000) != 0x0;
         }
         
+        /**
+         Check if there are any messages waiting in a RX queue
+         
+         - Returns: uint8_t; The current count of messages pending in the queue.
+         */
         uint8_t rxMessagesWaitingInFIFO(const uint8_t fifo) {
             //The bottom two bits of RFR register indicate message in FIFO count
             return (RFR[fifo] & 0x3);
         }
         
         /**
-         transmitMessage: Method to queue CANMessage for transmission
-         parameter msg: A reference to a CANMessage to be transmitted on the bus
-         returns: if message was successfully queued the mailbox number the message was queued into is returned,
-                  otherwise -1 is returned if the message was not queued for transmission.
+         Method to queue CANMessage for transmission
+         
+         - Parameter msg: A reference to a CANMessage to be transmitted on the bus
+         
+         - Returns: int8_t; if message was successfully queued the mailbox number the message was queued into is 
+                    returned, otherwise -1 is returned if the message was not queued for transmission.
          */
         int8_t transmitMessage(const CANMessage& msg) {
             uint8_t targetMB = 0;
@@ -228,6 +284,14 @@ namespace CAN {
             
             return targetMB;
         }
+        
+        /**
+         Method to recieve a message from a RX queue
+         
+         - Parameter fifo: The queue number (0 or 1) to recieve a message from.
+         
+         - Parameter msg&: A reference to copy the message into.
+         */
         void recieveMessageFromFIFO(const int8_t fifo, CANMessage& msg) {
             //Copy The Identifier from the mailbox
             const uint32_t idReg = rxFIFO[fifo].RIR;
@@ -254,45 +318,218 @@ namespace CAN {
         }
         
         //Peripheral Interrupt methods
-        bool tx0Complete();
-        void ackTX0Complete();
-        bool tx1Complete();
-        void ackTX1Complete();
-        bool tx2Complete();
-        void ackTX2Complete();
+        /**
+         Check if TX mailbox 0 has completed transmission
+         
+         - Returns: bool; True if it has, false otherwise
+         */
+        bool tx0Complete() {
+            return (TSR & 0x1) == 0x1;
+        }
+        /**
+         Acknowledge TX mailbox 0 has completed transmission; clear interrupt
+         */
+        void ackTX0Complete() {
+            TSR |= 0x1; //Clear by writing 1
+        }
+        /**
+         Check if TX mailbox 1 has completed transmission
+         
+         - Returns: bool; True if it has, false otherwise
+         */
+        bool tx1Complete() {
+            return (TSR & (1 << 8)) == (1 << 8);
+        }
+        /**
+         Acknowledge TX mailbox 1 has completed transmission; clear interrupt
+         */
+        void ackTX1Complete() {
+            TSR |= (1 << 8); //Clear by writing 1
+        }
+        /**
+         Check if TX mailbox 1 has completed transmission
+         
+         - Returns: bool; True if it has, false otherwise
+         */
+        bool tx2Complete() {
+            return (TSR & (1 << 16)) == (1 << 16);
+        }
+        /**
+         Acknowledge TX mailbox 0 has completed transmission; clear interrupt
+         */
+        void ackTX2Complete() {
+            TSR |= 1 << 16; //Clear by writing 1
+        }
         
-        void releaseFIFO0();
-        void releaseFIFO1();
+        /**
+         Enable generation of interrupt on the bus entering sleep mode
+         */
+        void enableSleepInterrupt() {
+            IER |= (ENABLE << 17);
+        }
+        /**
+         Enable generation of interrupt on detection of SOF while in sleep mode
+         */
+        void enableWakupInterrupt() {
+            IER |= (ENABLE << 16);
+        }
+        /**
+         Enable interrupt generation when there is a pending error condition
+         */
+        void enableErrorInterrupt() {
+            IER |= (ENABLE << 15);
+        }
+        /**
+         Enable interrupt generation when an error code has been set
+         */
+        void enableLastErrorCodeInterrupt() {
+            IER |= (ENABLE << 11);
+        }
+        /**
+         Enable interrupt generation when the bus enters Bus-Off state
+         */
+        void enableBusOffInterrupt() {
+            IER |= (ENABLE << 10);
+        }
+        /**
+         Enable interrupt generation when the bus enters Error-Passive state
+         */
+        void enableErrorPassiveInterrupt() {
+            IER |= (ENABLE << 9);
+        }
+        /**
+         Enable interrrupt generation when the bus enters Error-Warning state
+         */
+        void enableErrorWarnInterrupt() {
+            IER |= (ENABLE << 8);
+        }
+        /**
+         Enable interrupt generation when FIFO 1 overruns
+         */
+        void enableFIFO1OverrunInterrupt() {
+            IER |= (ENABLE << 6);
+        }
+        /**
+         Enable interrupt generation when FIFO 1 is full
+         */
+        void enableFIFO1FullInterrupt() {
+            IER |= (ENABLE << 5);
+        }
+        /**
+         Enable interrupt generation when FIFO 1 has a message pending in its queue
+         */
+        void enableFIFO1MessagePendingInterrupt() {
+            IER |= (ENABLE << 4);
+        }
+        /**
+         Enable interrupt generation when FIFO 0 overruns
+         */
+        void enableFIFO0OverrunInterrupt() {
+            IER |= (ENABLE << 3);
+        }
+        /**
+         Enable interrupt generation when FIFO 0  is full
+         */
+        void enableFIFO0FullInterrupt() {
+            IER |= (ENABLE << 2);
+        }
+        /**
+         Enable interrupt generation when FIFO 0 has a message pending in its queue
+         */
+        void enableFIFO0MessagePendingInterrupt() {
+            IER |= (ENABLE << 1);
+        }
+        /**
+         Enable interrupt generation when a TX mailbox becomes empty (Completes transmission)
+         */
+        void enableTXMailboxEmptyInterrupt() {
+            IER |= (ENABLE);
+        }
         
-        void enableSleepInterrupt();
-        void enableWakupInterrupt();
-        void enableErrorInterrupt();
-        void enableLastErrorCodeInterrupt();
-        void enableBusOffInterrupt();
-        void enableErrorPassiveInterrupt();
-        void enableErrorWarnInterrupt();
-        void enableFIFO0OverrunInterrupt();
-        void enableFIFO0FullInerrupt();
-        void enableFIFO0MessagePendingInterrupt();
-        void enableFIFO1OverrunInterrupt();
-        void enableFIFO1FullInerrupt();
-        void enableFIFO1MessagePendingInterrupt();
-        void enableTXMailboxEmptyInterrupt();
-        
-        void disableSleepInterrupt();
-        void disableWakupInterrupt();
-        void disableErrorInterrupt();
-        void disableLastErrorCodeInterrupt();
-        void disableBusOffInterrupt();
-        void disableErrorPassiveInterrupt();
-        void disableErrorWarnInterrupt();
-        void disableFIFO0OverrunInterrupt();
-        void disableFIFO0FullInerrupt();
-        void disableFIFO0MessagePendingInterrupt();
-        void disableFIFO1OverrunInterrupt();
-        void disableFIFO1FullInerrupt();
-        void disableFIFO1MessagePendingInterrupt();
-        void disableTXMailboxEmptyInterrupt();
+        /**
+         Disable interrupt generation when bus enters sleep mode
+         */
+        void disableSleepInterrupt() {
+            IER &= ~(ENABLE << 17);
+        }
+        /**
+         Disable interrupt generation when SOF detected in sleep mode
+         */
+        void disableWakupInterrupt() {
+            IER &= ~(ENABLE << 16);
+        }
+        /**
+         Disable interrupt generation when there is a pending error condition
+         */
+        void disableErrorInterrupt() {
+            IER &= ~(ENABLE << 15);
+        }
+        /**
+         Disable interrupt generation when an error code is set by hardware
+         */
+        void disableLastErrorCodeInterrupt() {
+            IER &= ~(ENABLE << 11);
+        }
+        /**
+         Disable interrupt generation when the bus enters Bus-off state
+         */
+        void disableBusOffInterrupt() {
+            IER &= ~(ENABLE << 10);
+        }
+        /**
+         Disable interrupt generation when the bus enters Passive-Error state
+         */
+        void disableErrorPassiveInterrupt() {
+            IER &= ~(ENABLE << 9);
+        }
+        /**
+         Disable interrupt generation when the bus enters Error-Warning state
+         */
+        void disableErrorWarnInterrupt() {
+            IER &= ~(ENABLE << 8);
+        }
+        /**
+         Disable interrupt generation when FIFO 1 overruns
+         */
+        void disableFIFO1OverrunInterrupt() {
+            IER &= ~(ENABLE << 6);
+        }
+        /**
+         Disable interrupt generation when FIFO 1 is full
+         */
+        void disableFIFO1FullInterrupt() {
+            IER &= ~(ENABLE << 5);
+        }
+        /**
+         Disable interrupt generation when FIFO 1 has a pending message
+         */
+        void disableFIFO1MessagePendingInterrupt() {
+            IER &= ~(ENABLE << 4);
+        }
+        /**
+         Disable interrupt generation when FIFO 0 overruns
+         */
+        void disableFIFO0OverrunInterrupt() {
+            IER &= ~(ENABLE << 3);
+        }
+        /**
+         Disable interrupt generation when FIFO 0 is full
+         */
+        void disableFIFO0FullInterrupt() {
+            IER &= ~(ENABLE << 2);
+        }
+        /**
+         Disable interrupt generation when FIFO 0 has a message pending.
+         */
+        void disableFIFO0MessagePendingInterrupt() {
+            IER &= ~(ENABLE << 1);
+        }
+        /**
+         Disable interrupt generation when a TX mailbox becomes empty (Completes transmission)
+         */
+        void disableTXMailboxEmptyInterrupt() {
+            IER &= ~(ENABLE);
+        }
         
         //Error handling methods
         enum class ErrorCode : uint8_t {
@@ -305,12 +542,55 @@ namespace CAN {
             CRCError          = 0b110,
             SetBySoftware     = 0b111
         };
-        uint8_t getCurrentRXErrorCount();
-        uint8_t getCurrentTXErrorCount();
-        ErrorCode getLastErrorCode();
-        bool isInBusOffMode();
-        bool isInErrorWarningMode();
-        bool isInErrorPassiveMode();
+        
+        /**
+         Retrieve the current Recieve Error count from hardware
+         
+         - Returns: uint8_t; The current recieve error count
+         */
+        uint8_t getCurrentRXErrorCount() {
+            return (ESR >> 24);
+        }
+        /**
+         Retrieve the current Transmite Error count from hardware
+         
+         - Returns: uint8_t; The current transmit error count
+         */
+        uint8_t getCurrentTXErrorCount() {
+            return (ESR >> 16) & 0xFF;
+        }
+        /**
+         Retrieve the last Error Code set by the hardware
+         
+         - Returns: ErrorCode; The last error code type set by the hardware
+         */
+        ErrorCode getLastErrorCode() {
+            return static_cast<ErrorCode>((ESR >> 4) & 0x7);
+        }
+        /**
+         Check if the bus is currently in Bus-Off state
+         
+         - Returns: bool; True if bus is in Bus-Off state, false otherwise
+         */
+        bool isInBusOffState() {
+            return (ESR & 0x4) == 0x4;
+        }
+        /**
+         Check if the bus is currently in Error-Warning state
+         
+         - Returns: bool; True if the bus is in Error-Warning state, false otherwise
+         */
+        bool isInErrorWarningState() {
+            return (ESR & 0x1) == 0x1;
+        }
+        /**
+         Check if the bus is currently in Error-Passive state
+         
+         - Returns: bool; True if the bus is in Error-Passive state, false otherwise
+         */
+        bool isInErrorPassiveState() {
+            return (ESR & 0x2) == 0x2;
+        }
         
         dev_reg32_t MCR;
         dev_reg32_t MSR;
