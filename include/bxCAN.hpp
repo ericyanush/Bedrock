@@ -35,19 +35,183 @@ namespace CAN {
     class Filters {
     public:
         
-        enum class Mode : uint8_t {
-            Mask = 0,
-            List = 1
+        /**
+         Note: These filter type structs assume little-endian hardware
+                which both armv7(e)-m and x86(-64) are.
+         */
+        struct SingleIDFilter_t {
+            uint32_t     : 1,
+                     rtr : 1,
+                     ide : 1,
+                     id  : 29;
         };
-        enum class Width: uint8_t {
-            Dual = 0,
-            Single = 1
+        
+        struct SingleMaskFilter_t {
+            uint32_t          : 1,
+                     rtr_mask : 1,
+                     ide_mask : 1,
+                     id_mask  : 29;
         };
+        
+        struct DualIDFilter_t {
+            uint16_t extID : 3,
+                     ide   : 1,
+                     rtr   : 1,
+                     id    : 11;
+        };
+        
+        struct DualMaskFilter_t {
+            uint16_t extID_mask : 3,
+                     ide_mask   : 1,
+                     rtr_mask   : 1,
+                     id_mask    : 11;
+        };
+        
+        /**
+         Enable a filter bank
+         
+         - Parameter filterIndex: The index of the filter bank to enable
+         */
+        void enableFilterBank(uint8_t filterIndex) {
+            FA1R |= (1 << filterIndex);
+        }
+
+        /**
+         Disable a filter bank
+         
+         - Parameter filterIndex: The index of the filter bank to disable
+         */
+        void disableFilterBank(uint8_t filterIndex) {
+            FA1R &= ~(1 << filterIndex);
+        }
+        
+        /**
+         Configure a filter bank in Single-Width Mask mode; A frame may match the masked filter.
+         
+         - Parameter filterIndex: The filter bank index to configure
+         - Parameter filter: The CAN Identifier to match against
+         - Parameter mask: The mask to use with the CAN Identifier to match
+         */
+        void configureSingleMaskFilter(uint8_t filterIndex,
+                                       SingleIDFilter_t& filter,
+                                       SingleMaskFilter_t& mask)
+        {
+            FMR |= 0x1; //Set FINIT bit
+            
+            //Set the filter scale and mode
+            FM1R &= ~(1 << filterIndex); //Set mode to 0 (mask mode)
+            FS1R |= (1 << filterIndex); //Set scale to 1 (single width)
+            
+            filterBank[filterIndex].FR1 = *reinterpret_cast<uint32_t*>(&filter);
+            filterBank[filterIndex].FR2 = *reinterpret_cast<uint32_t*>(&mask);
+            
+            FMR ^= 0x1; //Clear FINIT bit
+        }
+        /**
+         Configure a filter bank in Single-Width ID List mode; A frame
+         may exactly match any one of the two configured filters.
+         
+         - Parameter filterIndex: The filter bank index to configure
+         - Parameter filter1: The first CAN Identifier to match against
+         - Parameter filter2: The second CAN Identifier to match against
+         */
+        void configureSingleIDListFilter(uint8_t filterIndex,
+                                         SingleIDFilter_t& filter1,
+                                         SingleIDFilter_t& filter2)
+        {
+            FMR |= 1; //Set the FINIT bit
+            
+            //Set the filter scale and mode
+            FM1R |= (1 << filterIndex); //Set mode to 1 (id mode)
+            FS1R |= (1 << filterIndex); //Set scale to 1 (single width)
+            
+            filterBank[filterIndex].FR1 = *reinterpret_cast<uint32_t*>(&filter1);
+            filterBank[filterIndex].FR2 = *reinterpret_cast<uint32_t*>(&filter2);
+            
+            FMR ^= 1; //Clear the FINIT bit
+        }
+        /**
+         Configure a filter bank in Dual-Width Mask mode; A frame may match any one of the two masked filters.
+         
+         - Parameter filterIndex: The filter bank index to configure
+         - Parameter filter1: The CAN Identifier to match against
+         - Parameter mask1: The mask to use with filter1
+         - Parameter filter2: A second CAN Identifier to match against
+         - Paramter mask2: The mask to use with filter2
+         */
+        void configureDualMaskFilter(uint8_t filterIndex,
+                                     DualIDFilter_t& filter1,
+                                     DualMaskFilter_t& mask1,
+                                     DualIDFilter_t& filter2,
+                                     DualMaskFilter_t& mask2)
+        {
+            FMR |= 1; //Set the FINIT bit
+            
+            //Set the mode and scale
+            FM1R &= ~(1 << filterIndex); //Set mode to 0 (mask mode)
+            FS1R &= ~(1 << filterIndex); //Set the scale to 0 (Dual width)
+            
+            filterBank[filterIndex].FR1 = (*reinterpret_cast<uint16_t*>(&filter1) << 16) | (*reinterpret_cast<uint16_t*>(&filter2));
+            filterBank[filterIndex].FR2 = (*reinterpret_cast<uint16_t*>(&mask1) << 16) | (*reinterpret_cast<uint16_t*>(&mask2));
+            
+            FMR ^= 1; //clear the FINIT bit
+        }
+        
+        /**
+         Configure a filter bank in Dual-Width ID List mode;  A frame may match exactly any one of four configured filters.
+         
+         - Parameter filterIndex: The filter bank index to configure
+         - Parameter filter1: The first CAN Identifier to match against
+         - Parameter mask1: The mask to use with filter1
+         - Parameter filter2: The second CAN Identifier to match against
+         - Parameter mask2: The mask to use with filter2
+         - Parameter filter3: The third CAN Identifier to match against
+         - Parameter mask3: The mask to use with filter3
+         - Parameter filter4: The fourth CAN Identifier to match against
+         - Parameter mask4: The mask to use with filter4
+         */
+        void configureDualIDListFilter(uint8_t filterIndex,
+                                       DualIDFilter_t& filter1,
+                                       DualIDFilter_t& filter2,
+                                       DualIDFilter_t& filter3,
+                                       DualIDFilter_t& filter4)
+        {
+            FMR |= 1; //Set FINIT bit
+            
+            //Set scale and mode
+            FM1R |= (1 << filterIndex); //Set mode to 1 (ID mode)
+            FS1R &= ~(1 << filterIndex); //Set the scale to 0 (Dual width)
+            
+            filterBank[filterIndex].FR1 = (*reinterpret_cast<uint16_t*>(&filter1) << 16) | (*reinterpret_cast<uint16_t*>(&filter2));
+            filterBank[filterIndex].FR2 = (*reinterpret_cast<uint16_t*>(&filter3) << 16) | (*reinterpret_cast<uint16_t*>(&filter4));
+            
+            FMR ^= 1; //Clear the FINIT bit
+        }
+        
+        /**
+         Configure a filter bank to place matched frames into a specific FIFO queue
+         
+         - Parameter filter: The filter index of the filter to configure
+         - Paramter fifo: The fifo index to place matched frames into
+         
+         */
+        void assignFilterToFIFO(uint8_t filter, uint8_t fifo) {
+            FMR |= 0x1; // Set the FINIT bit to allow changes
+            
+            if (fifo == 1) {
+                FFA1R |= (1 << filter);
+            }
+            else {
+                FFA1R &= ~(1 << filter);
+            }
+            
+            FMR ^= 0x1; // Clear the FINIT bit
+        }
+        
         struct FilterBank {
             dev_reg32_t FR1;
             dev_reg32_t FR2;
         };
-        
         dev_reg32_t FMR;
         dev_reg32_t FM1R;
         //Padding
@@ -55,7 +219,7 @@ namespace CAN {
         dev_reg32_t FS1R;
         //Padding
         uint32_t _pad_2;
-        dev_reg32_t FF1AR;
+        dev_reg32_t FFA1R;
         //Padding
         uint32_t _pad_3;
         dev_reg32_t FA1R;

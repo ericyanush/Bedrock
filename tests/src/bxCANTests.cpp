@@ -93,7 +93,7 @@ TEST_F(CANTests, TestCANRegLayout) {
     ASSERT_EQ(0x00, offsetof(CAN::Filters, FMR));
     ASSERT_EQ(0x04, offsetof(CAN::Filters, FM1R));
     ASSERT_EQ(0x0C, offsetof(CAN::Filters, FS1R));
-    ASSERT_EQ(0x14, offsetof(CAN::Filters, FF1AR));
+    ASSERT_EQ(0x14, offsetof(CAN::Filters, FFA1R));
     ASSERT_EQ(0x1C, offsetof(CAN::Filters, FA1R));
     ASSERT_EQ(0x40, offsetof(CAN::Filters, filterBank[0]));
     ASSERT_EQ(0x240, offsetof(CAN::CAN, filters.filterBank));
@@ -601,4 +601,219 @@ TEST_F(CANTests, TestIsInErrorPassiveState) {
     ASSERT_FALSE(can.isInErrorPassiveState());
     can.ESR = (1 << 1);
     ASSERT_TRUE(can.isInErrorPassiveState());
+}
+
+TEST_F(CANTests, TestFilterStructs) {
+    //Test the single id struct
+    ASSERT_EQ(4, sizeof(CAN::Filters::SingleIDFilter_t));
+    CAN::Filters::SingleIDFilter_t singleId{0};
+    uint32_t& rawSingleId = *reinterpret_cast<uint32_t*>(&singleId);
+    singleId.ide = 1;
+    ASSERT_TRUE((rawSingleId & 0x4) == 0x4);
+    singleId.ide = 0;
+    singleId.rtr = 1;
+    ASSERT_TRUE((rawSingleId & 0x2) == 0x2);
+    singleId.rtr = 0;
+    singleId.id = 0x12345678;
+    ASSERT_TRUE((rawSingleId >> 3) == 0x12345678);
+    
+    //Test the single mask struct
+    ASSERT_EQ(4, sizeof(CAN::Filters::SingleMaskFilter_t));
+    CAN::Filters::SingleMaskFilter_t singleMask{0};
+    uint32_t& rawSingleMask = *reinterpret_cast<uint32_t*>(&singleMask);
+    singleMask.id_mask = 0x12345678;
+    ASSERT_EQ(0x12345678, rawSingleMask >> 3);
+    singleMask.id_mask = 0;
+    singleMask.ide_mask = 1;
+    ASSERT_EQ(0x4, rawSingleMask & 0x4);
+    singleMask.ide_mask = 0;
+    singleMask.rtr_mask = 1;
+    ASSERT_EQ(0x2, rawSingleMask & 0x2);
+    
+    //Test the Dual ID struct
+    ASSERT_EQ(2, sizeof(CAN::Filters::DualIDFilter_t));
+    CAN::Filters::DualIDFilter_t dualId{0};
+    uint16_t& rawDualId = *reinterpret_cast<uint16_t*>(&dualId);
+    dualId.id = 0x7A8;
+    ASSERT_EQ(0x7A8, rawDualId >> 5);
+    dualId.id = 0;
+    dualId.ide = 1;
+    ASSERT_EQ(0x8, rawDualId & 0x8);
+    dualId.ide = 0;
+    dualId.rtr = 1;
+    ASSERT_EQ(0x10, rawDualId & 0x10);
+    dualId.rtr = 0;
+    dualId.extID = 0x5;
+    ASSERT_EQ(0x5, rawDualId);
+    
+    //Test the Dual Mask struct
+    ASSERT_EQ(2, sizeof(CAN::Filters::DualMaskFilter_t));
+    CAN::Filters::DualMaskFilter_t dualMask{0};
+    uint16_t& rawDualMask = *reinterpret_cast<uint16_t*>(&dualMask);
+    dualMask.id_mask = 0x7A8;
+    ASSERT_EQ(0x7A8, rawDualMask >> 5);
+    dualMask.id_mask = 0;
+    dualMask.ide_mask = 1;
+    ASSERT_EQ(0x8, rawDualMask & 0x8);
+    dualMask.ide_mask = 0;
+    dualMask.rtr_mask = 1;
+    ASSERT_EQ(0x10, rawDualMask & 0x10);
+    dualMask.rtr_mask = 0;
+    dualMask.extID_mask = 0x5;
+    ASSERT_EQ(0x5, rawDualMask);
+}
+
+TEST_F(CANTests, TestEnableFilter) {
+    for (uint8_t i = 0; i < 14; i++) {
+        can.filters.enableFilterBank(i);
+        ASSERT_EQ(1 << i, can.filters.FA1R);
+        can.filters.FA1R = 0;
+    }
+}
+
+TEST_F(CANTests, TestDisableFilter) {
+    for (uint8_t i = 0; i < 14; i++) {
+        can.filters.FA1R |= (1 << i);
+        can.filters.disableFilterBank(i);
+        ASSERT_EQ(0, can.filters.FA1R);
+    }
+}
+
+TEST_F(CANTests, TestAssignFilterToFIFO) {
+    //note: we cannot test for FINIT bit being set (required by hw)!
+    for (uint8_t i = 0; i < 14; i++) {
+        can.filters.assignFilterToFIFO(i, 1);
+        ASSERT_EQ((1 << i), can.filters.FFA1R & (1 << i));
+        can.filters.assignFilterToFIFO(i, 0);
+        ASSERT_EQ(0, can.filters.FFA1R);
+    }
+}
+
+TEST_F(CANTests, TestConfigureSingleMaskFilter) {
+    using Filters = CAN::Filters;
+    Filters::SingleIDFilter_t id{0};
+    Filters::SingleMaskFilter_t mask{0};
+    //Set some values
+    id.id = 0x12345678;
+    id.ide = 1;
+    id.rtr = 0;
+    mask.id_mask = 0x12348765;
+    mask.ide_mask = 1;
+    id.rtr = 1;
+    
+    uint32_t& rawId = *reinterpret_cast<uint32_t*>(&id);
+    uint32_t& rawMask = *reinterpret_cast<uint32_t*>(&mask);
+    
+    //Test all the filter banks
+    for (uint8_t i = 0; i < 14; i++) {
+        can.filters.configureSingleMaskFilter(i, id, mask);
+        ASSERT_EQ(rawId, can.filters.filterBank[i].FR1);
+        ASSERT_EQ(rawMask, can.filters.filterBank[i].FR2);
+        ASSERT_TRUE((can.filters.FM1R & (1 << i)) == 0); // Ensure we are in mask mode
+        ASSERT_TRUE((can.filters.FS1R & (1 << i)) == (1 << i)); //Ensure we are in Single scale mode
+        ASSERT_EQ(0, can.filters.FMR); //Ensure the FINIT bit is cleared
+    }
+}
+
+TEST_F(CANTests, TestConfigureSingleIDListFilter) {
+    using Filters = CAN::Filters;
+    Filters::SingleIDFilter_t id{0};
+    Filters::SingleIDFilter_t id2{0};
+    //Set some values
+    id.id = 0x12345678;
+    id.ide = 1;
+    id.rtr = 0;
+    id2.id = 0x12348765;
+    id2.ide = 1;
+    id.rtr = 1;
+    
+    uint32_t& rawId = *reinterpret_cast<uint32_t*>(&id);
+    uint32_t& rawId2 = *reinterpret_cast<uint32_t*>(&id2);
+    
+    //Test all the filter banks
+    for (uint8_t i = 0; i < 14; i++) {
+        can.filters.configureSingleIDListFilter(i, id, id2);
+        ASSERT_EQ(rawId, can.filters.filterBank[i].FR1);
+        ASSERT_EQ(rawId2, can.filters.filterBank[i].FR2);
+        ASSERT_TRUE((can.filters.FM1R & (1 << i)) == (1 << i)); // Ensure we are in ID mode
+        ASSERT_TRUE((can.filters.FS1R & (1 << i)) == (1 << i)); //Ensure we are in Single scale mode
+        ASSERT_EQ(0, can.filters.FMR); //Ensure the FINIT bit is cleared
+    }
+}
+
+TEST_F(CANTests, TestConfigureDualMaskFilter) {
+    using Filters = CAN::Filters;
+    Filters::DualIDFilter_t id1{0};
+    Filters::DualMaskFilter_t mask1{0};
+    Filters::DualIDFilter_t id2{0};
+    Filters::DualMaskFilter_t mask2{0};
+    
+    //Set some values
+    id1.id = 0x7AF;
+    id1.ide = 1;
+    id1.rtr = 0;
+    mask1.id_mask = 0x111;
+    mask1.ide_mask = 1;
+    mask1.rtr_mask = 1;
+    id2.id = 0x500;
+    id2.ide = 1;
+    id2.rtr = 1;
+    mask2.id_mask = 0x555;
+    mask2.ide_mask = 0;
+    mask2.rtr_mask = 0;
+    
+    
+    uint16_t& rawId1 = *reinterpret_cast<uint16_t*>(&id1);
+    uint16_t& rawMask1 = *reinterpret_cast<uint16_t*>(&mask1);
+    uint16_t& rawId2 = *reinterpret_cast<uint16_t*>(&id2);
+    uint16_t& rawMask2 = *reinterpret_cast<uint16_t*>(&mask2);
+    
+    //Test all the filter banks
+    for (uint8_t i = 0; i < 14; i++) {
+        can.filters.configureDualMaskFilter(i, id1, mask1, id2, mask2);
+        ASSERT_EQ((rawId1 << 16) | rawId2, can.filters.filterBank[i].FR1);
+        ASSERT_EQ((rawMask1 << 16) | rawMask2, can.filters.filterBank[i].FR2);
+        ASSERT_TRUE((can.filters.FM1R & (1 << i)) == 0); // Ensure we are in mask mode
+        ASSERT_TRUE((can.filters.FS1R & (1 << i)) == 0); //Ensure we are in Dual scale
+        ASSERT_EQ(0, can.filters.FMR); //Ensure the FINIT bit is cleared
+    }
+}
+
+TEST_F(CANTests, TestConfigureDualIDListFilter) {
+    using Filters = CAN::Filters;
+    Filters::DualIDFilter_t id1{0};
+    Filters::DualIDFilter_t id2{0};
+    Filters::DualIDFilter_t id3{0};
+    Filters::DualIDFilter_t id4{0};
+    
+    //Set some values
+    id1.id = 0x7AF;
+    id1.ide = 1;
+    id1.rtr = 0;
+    id2.id = 0x111;
+    id2.ide = 1;
+    id2.rtr = 1;
+    id2.extID = 0x2;
+    id3.id = 0x500;
+    id3.ide = 1;
+    id3.rtr = 1;
+    id4.id = 0x555;
+    id4.ide = 0;
+    id4.rtr = 0;
+    
+    
+    uint16_t& rawId1 = *reinterpret_cast<uint16_t*>(&id1);
+    uint16_t& rawId2 = *reinterpret_cast<uint16_t*>(&id2);
+    uint16_t& rawId3 = *reinterpret_cast<uint16_t*>(&id3);
+    uint16_t& rawId4 = *reinterpret_cast<uint16_t*>(&id4);
+    
+    //Test all the filter banks
+    for (uint8_t i = 0; i < 14; i++) {
+        can.filters.configureDualIDListFilter(i, id1, id2, id3, id4);
+        ASSERT_EQ((rawId1 << 16) | rawId2, can.filters.filterBank[i].FR1);
+        ASSERT_EQ((rawId3 << 16) | rawId4, can.filters.filterBank[i].FR2);
+        ASSERT_TRUE((can.filters.FM1R & (1 << i)) == (1 << i)); // Ensure we are in ID mode
+        ASSERT_TRUE((can.filters.FS1R & (1 << i)) == 0); //Ensure we are in Dual scale
+        ASSERT_EQ(0, can.filters.FMR); //Ensure the FINIT bit is cleared
+    }
 }
