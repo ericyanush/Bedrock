@@ -9,7 +9,7 @@
 #include "InterruptManager.hpp"
 
 extern "C" {
-    void InterruptManager::interruptHandler() {
+    void interruptHandler() {
         int i = 12;
         i ++;
         return;

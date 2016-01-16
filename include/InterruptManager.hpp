@@ -16,14 +16,20 @@
 
 using InterruptHandler = std::function<void(void)>;
 
+extern "C" {
+    void interruptHandler();
+}
+
 class InterruptManager {
 public:
-    static void interruptHandler();
-    
     static void setHandlerForInterrupt(InterruptVector vector, InterruptHandler handler);
     static void enableInterrupt(InterruptVector vector);
     static void disableInterrupt(InterruptVector vector);
     static void setPriorityForInterrupt(InterruptVector vector, uint8_t priority);
+    
+private:
+    friend void interruptHandler();
 };
+
 
 #endif /* InterruptManager_hpp */
