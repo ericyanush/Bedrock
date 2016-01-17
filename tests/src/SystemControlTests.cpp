@@ -9,6 +9,13 @@
 #include "SystemControl.hpp"
 #include "gtest/gtest.h"
 
+
+enum class InterruptVector : int32_t {
+    Minus10 = -10,
+    One = 1,
+    Two = 2
+};
+
 /**
  Note: upon initializtion of the test fixture, the scb member object is initialized
  to all zeros. The scbIsInInitState function checks to see if the scb member object
@@ -76,4 +83,12 @@ TEST_F(SystemControlTest, TestGetPriorityGroups) {
     scb.setPriorityGroups(PriorityGroupCount::Groups_4);
     
     ASSERT_EQ(PriorityGroupCount::Groups_4, scb.getPriorityGroups());
+}
+
+TEST_F(SystemControlTest, TestGetActiveVector) {
+    scb.ICSR = (static_cast<int32_t>(InterruptVector::Minus10) + 16); //HW sets the active vector field to (Int# + 16)
+    ASSERT_EQ(InterruptVector::Minus10, scb.getActiveVector());
+    
+    scb.ICSR = (static_cast<int32_t>(InterruptVector::Two) + 16);
+    ASSERT_EQ(InterruptVector::Two, scb.getActiveVector());
 }

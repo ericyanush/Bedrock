@@ -66,6 +66,10 @@ public:
         return PriorityGroupCount((AIRCR >> 8) & 0b111);
     }
     
+    InterruptVector getActiveVector() {
+        return static_cast<InterruptVector>(((int16_t)(ICSR & 0x1FF)) - 16);
+    }
+    
 private:
     static constexpr uint32_t VECT_KEY = 0x05FA0000; //The key that must be written to modify some register values
 };
