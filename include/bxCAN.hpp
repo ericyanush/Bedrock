@@ -14,7 +14,7 @@
 #include "CANMessage.hpp"
 #include "RCC.hpp"
 
-namespace CAN {
+namespace bxCAN {
     
     class TxMailbox {
     public:
@@ -229,7 +229,7 @@ namespace CAN {
     };
     
     
-    class CAN {
+    class CANPort {
     public:
         
         /**

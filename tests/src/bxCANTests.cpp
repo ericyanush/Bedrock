@@ -45,11 +45,11 @@ protected:
     }
     
     bool canIsAllZeros() {
-        return memcmp(&untouched, &can, sizeof(CAN::CAN));
+        return memcmp(&untouched, &can, sizeof(bxCAN::CANPort));
     }
     
-    CAN::CAN can{0};
-    CAN::CAN untouched{0};
+    bxCAN::CANPort can{0};
+    bxCAN::CANPort untouched{0};
     CANMessage testMessage;
 };
 
@@ -59,48 +59,48 @@ protected:
 TEST_F(CANTests, TestCANRegLayout) {
     
     //Ensure base peripheral register offsets are correct
-    ASSERT_EQ(0x000, offsetof(CAN::CAN, MCR));
-    ASSERT_EQ(0x004, offsetof(CAN::CAN, MSR));
-    ASSERT_EQ(0x008, offsetof(CAN::CAN, TSR));
-    ASSERT_EQ(0x00C, offsetof(CAN::CAN, RFR[0]));
-    ASSERT_EQ(0x010, offsetof(CAN::CAN, RFR[1]));
-    ASSERT_EQ(0x014, offsetof(CAN::CAN, IER));
-    ASSERT_EQ(0x018, offsetof(CAN::CAN, ESR));
-    ASSERT_EQ(0x01C, offsetof(CAN::CAN, BTR));
+    ASSERT_EQ(0x000, offsetof(bxCAN::CANPort, MCR));
+    ASSERT_EQ(0x004, offsetof(bxCAN::CANPort, MSR));
+    ASSERT_EQ(0x008, offsetof(bxCAN::CANPort, TSR));
+    ASSERT_EQ(0x00C, offsetof(bxCAN::CANPort, RFR[0]));
+    ASSERT_EQ(0x010, offsetof(bxCAN::CANPort, RFR[1]));
+    ASSERT_EQ(0x014, offsetof(bxCAN::CANPort, IER));
+    ASSERT_EQ(0x018, offsetof(bxCAN::CANPort, ESR));
+    ASSERT_EQ(0x01C, offsetof(bxCAN::CANPort, BTR));
     
     //Ensure Transmit Mailbox Register offsets are correct
-    ASSERT_EQ(0x180, offsetof(CAN::CAN, txMailbox[0]));
-    ASSERT_EQ(0x190, offsetof(CAN::CAN, txMailbox[1]));
-    ASSERT_EQ(0x1A0, offsetof(CAN::CAN, txMailbox[2]));
+    ASSERT_EQ(0x180, offsetof(bxCAN::CANPort, txMailbox[0]));
+    ASSERT_EQ(0x190, offsetof(bxCAN::CANPort, txMailbox[1]));
+    ASSERT_EQ(0x1A0, offsetof(bxCAN::CANPort, txMailbox[2]));
     //Test the Register layout of the TxMailbox
-    ASSERT_EQ(0x0, offsetof(CAN::TxMailbox, TIR));
-    ASSERT_EQ(0x4, offsetof(CAN::TxMailbox, TDTR));
-    ASSERT_EQ(0x8, offsetof(CAN::TxMailbox, TDLR));
-    ASSERT_EQ(0xC, offsetof(CAN::TxMailbox, TDHR));
+    ASSERT_EQ(0x0, offsetof(bxCAN::TxMailbox, TIR));
+    ASSERT_EQ(0x4, offsetof(bxCAN::TxMailbox, TDTR));
+    ASSERT_EQ(0x8, offsetof(bxCAN::TxMailbox, TDLR));
+    ASSERT_EQ(0xC, offsetof(bxCAN::TxMailbox, TDHR));
     
     //Ensure RX FIFO Queue Register offsets are correct
-    ASSERT_EQ(0x1B0, offsetof(CAN::CAN, rxFIFO[0]));
-    ASSERT_EQ(0x1C0, offsetof(CAN::CAN, rxFIFO[1]));
+    ASSERT_EQ(0x1B0, offsetof(bxCAN::CANPort, rxFIFO[0]));
+    ASSERT_EQ(0x1C0, offsetof(bxCAN::CANPort, rxFIFO[1]));
     //Test the Register layout of the RX Queues
-    ASSERT_EQ(0x0, offsetof(CAN::RxFIFO, RIR));
-    ASSERT_EQ(0x4, offsetof(CAN::RxFIFO, RDTR));
-    ASSERT_EQ(0x8, offsetof(CAN::RxFIFO, RDLR));
-    ASSERT_EQ(0xC, offsetof(CAN::RxFIFO, RDHR));
+    ASSERT_EQ(0x0, offsetof(bxCAN::RxFIFO, RIR));
+    ASSERT_EQ(0x4, offsetof(bxCAN::RxFIFO, RDTR));
+    ASSERT_EQ(0x8, offsetof(bxCAN::RxFIFO, RDLR));
+    ASSERT_EQ(0xC, offsetof(bxCAN::RxFIFO, RDHR));
     
     //Ensure Filter Bank Register offsets are correct
-    ASSERT_EQ(0x200, offsetof(CAN::CAN, filters));
+    ASSERT_EQ(0x200, offsetof(bxCAN::CANPort, filters));
     //Test the Register layout of the Filters
-    ASSERT_EQ(0x00, offsetof(CAN::Filters, FMR));
-    ASSERT_EQ(0x04, offsetof(CAN::Filters, FM1R));
-    ASSERT_EQ(0x0C, offsetof(CAN::Filters, FS1R));
-    ASSERT_EQ(0x14, offsetof(CAN::Filters, FFA1R));
-    ASSERT_EQ(0x1C, offsetof(CAN::Filters, FA1R));
-    ASSERT_EQ(0x40, offsetof(CAN::Filters, filterBank[0]));
-    ASSERT_EQ(0x240, offsetof(CAN::CAN, filters.filterBank));
-    ASSERT_EQ(0x48, offsetof(CAN::Filters, filterBank[1]));
+    ASSERT_EQ(0x00, offsetof(bxCAN::Filters, FMR));
+    ASSERT_EQ(0x04, offsetof(bxCAN::Filters, FM1R));
+    ASSERT_EQ(0x0C, offsetof(bxCAN::Filters, FS1R));
+    ASSERT_EQ(0x14, offsetof(bxCAN::Filters, FFA1R));
+    ASSERT_EQ(0x1C, offsetof(bxCAN::Filters, FA1R));
+    ASSERT_EQ(0x40, offsetof(bxCAN::Filters, filterBank[0]));
+    ASSERT_EQ(0x240, offsetof(bxCAN::CANPort, filters.filterBank));
+    ASSERT_EQ(0x48, offsetof(bxCAN::Filters, filterBank[1]));
     //Test the register layout of the filter banks
-    ASSERT_EQ(0x0, offsetof(CAN::Filters::FilterBank, FR1));
-    ASSERT_EQ(0x4, offsetof(CAN::Filters::FilterBank, FR2));
+    ASSERT_EQ(0x0, offsetof(bxCAN::Filters::FilterBank, FR1));
+    ASSERT_EQ(0x4, offsetof(bxCAN::Filters::FilterBank, FR2));
 }
 
 TEST_F(CANTests, TestEnterInitMode) {
@@ -146,7 +146,8 @@ TEST_F(CANTests, TestExitInitMode) {
 
 TEST_F(CANTests, TestInit_defaults) {
     using namespace std::literals;
-    using CAN = CAN::CAN;
+    using BusFrequency = bxCAN::CANPort::BusFrequency;
+    using Mode = bxCAN::CANPort::Mode;
     
     auto asyncHW = [this]() {
         //Wait for an init mode request
@@ -167,11 +168,11 @@ TEST_F(CANTests, TestInit_defaults) {
     
     ASSERT_FALSE((can.MSR & 0x1) == 0x1); //Ensure we are not still in init mode
     ASSERT_FALSE((can.MCR & 0x1) == 0x1);
-    ASSERT_EQ(CAN::BusFrequency::KHz_125, static_cast<CAN::BusFrequency>(can.BTR & 0x1FF)); //Ensure we have set the prescaler value properly
+    ASSERT_EQ(BusFrequency::KHz_125, static_cast<BusFrequency>(can.BTR & 0x1FF)); //Ensure we have set the prescaler value properly
     ASSERT_EQ(8, ((can.BTR & 0x000F0000) >> 16) + 1); //Ensure we have setup BS1 to have 8tq
     ASSERT_EQ(3, ((can.BTR & 0x00700000) >> 20) + 1); //Ensure we have setup BS2 to have 3tq
     ASSERT_EQ(1, ((can.BTR & 0x03000000) >> 24) + 1); //Ensure we have setup the Sync Jump to be 1tq
-    ASSERT_EQ(CAN::Mode::Normal, static_cast<CAN::Mode>((can.BTR & 0xC0000000) >> 30)); //Ensure we have setup normal mode
+    ASSERT_EQ(Mode::Normal, static_cast<Mode>((can.BTR & 0xC0000000) >> 30)); //Ensure we have setup normal mode
     ASSERT_FALSE((can.MCR & 0x10) == 0x10); //Ensure we have Automatic Retransmission enabled (NART bit not set)
     ASSERT_TRUE((can.MCR & 0x40) == 0x40); // Ensure we have Automatic Bus-off management enabled (ABOM bit set)
     ASSERT_FALSE((can.MCR & 0x80) == 0x80); //Ensure we have Time Triggered Mode off (TTCM bit not set)
@@ -179,7 +180,9 @@ TEST_F(CANTests, TestInit_defaults) {
 
 TEST_F(CANTests, TestInit) {
     using namespace std::literals;
-    using CAN = CAN::CAN;
+    using BusFrequency = bxCAN::CANPort::BusFrequency;
+    using Mode = bxCAN::CANPort::Mode;
+    
     can.MCR |= 0x2; //Set the sleep bit, as this is done automatically by hw on reset
     
     auto asyncHW = [this]() {
@@ -196,16 +199,16 @@ TEST_F(CANTests, TestInit) {
     };
     std::thread async(asyncHW);
     
-    can.init(CAN::BusFrequency::MHz_1, CAN::Mode::SelfTest);
+    can.init(BusFrequency::MHz_1, Mode::SelfTest);
     async.join();
     
     ASSERT_FALSE((can.MSR & 0x1) == 0x1); //Ensure we are not still in init mode
     ASSERT_FALSE((can.MCR & 0x1) == 0x1);
-    ASSERT_EQ(CAN::BusFrequency::MHz_1, static_cast<CAN::BusFrequency>(can.BTR & 0x1FF)); //Ensure we have set the prescaler value properly
+    ASSERT_EQ(BusFrequency::MHz_1, static_cast<BusFrequency>(can.BTR & 0x1FF)); //Ensure we have set the prescaler value properly
     ASSERT_EQ(8, ((can.BTR & 0x000F0000) >> 16) + 1); //Ensure we have setup BS1 to have 8tq
     ASSERT_EQ(3, ((can.BTR & 0x00700000) >> 20) + 1); //Ensure we have setup BS2 to have 3tq
     ASSERT_EQ(1, ((can.BTR & 0x03000000) >> 24) + 1); //Ensure we have setup the Sync Jump to be 1tq
-    ASSERT_EQ(CAN::Mode::SelfTest, static_cast<CAN::Mode>((can.BTR & 0xC0000000) >> 30)); //Ensure we have setup self-test mode
+    ASSERT_EQ(Mode::SelfTest, static_cast<Mode>((can.BTR & 0xC0000000) >> 30)); //Ensure we have setup self-test mode
     ASSERT_FALSE((can.MCR & 0x10) == 0x10); //Ensure we have Automatic Retransmission enabled (NART bit not set)
     ASSERT_TRUE((can.MCR & 0x40) == 0x40); // Ensure we have Automatic Bus-off management enabled (ABOM bit set)
     ASSERT_FALSE((can.MCR & 0x80) == 0x80); //Ensure we have Time Triggered Mode disabled (TTCM bit not set)
@@ -213,15 +216,18 @@ TEST_F(CANTests, TestInit) {
 }
 
 TEST_F(CANTests, TestSetMode_unsafe) {
-    using CAN = CAN::CAN;
-    can.setMode_unsafe(CAN::Mode::SelfTest);
-    ASSERT_EQ(CAN::Mode::SelfTest, static_cast<CAN::Mode>((can.BTR & 0xC0000000) >> 30));
+    using BusFrequency = bxCAN::CANPort::BusFrequency;
+    using Mode = bxCAN::CANPort::Mode;
+    
+    can.setMode_unsafe(Mode::SelfTest);
+    ASSERT_EQ(Mode::SelfTest, static_cast<Mode>((can.BTR & 0xC0000000) >> 30));
     ASSERT_FALSE((can.MCR & 0x1) == 0x1); //Ensure we didn't try to enter into init mode
 }
 
 TEST_F(CANTests, TestSetMode) {
     using namespace std::literals;
-    using CAN = CAN::CAN;
+    using BusFrequency = bxCAN::CANPort::BusFrequency;
+    using Mode = bxCAN::CANPort::Mode;
     
     auto asyncHW = [this]() {
         //wait for an init request
@@ -238,25 +244,28 @@ TEST_F(CANTests, TestSetMode) {
     
     std::thread async(asyncHW);
     
-    can.setMode(CAN::Mode::Silent);
+    can.setMode(Mode::Silent);
     async.join();
     
-    ASSERT_EQ(CAN::Mode::Silent, static_cast<CAN::Mode>((can.BTR & 0xC0000000) >> 30));
+    ASSERT_EQ(Mode::Silent, static_cast<Mode>((can.BTR & 0xC0000000) >> 30));
     ASSERT_FALSE((can.MSR & 0x1) == 0x1); //Ensure we are not still in init mode
     ASSERT_FALSE((can.MCR & 0x1) == 0x1);
 }
 
 TEST_F(CANTests, TestSetFrequency_unsafe) {
-    using CAN = CAN::CAN;
-    can.setFrequency_unsafe(CAN::BusFrequency::KHz_250);
+    using BusFrequency = bxCAN::CANPort::BusFrequency;
+    using Mode = bxCAN::CANPort::Mode;
     
-    ASSERT_EQ(CAN::BusFrequency::KHz_250, static_cast<CAN::BusFrequency>(can.BTR & 0x1FF));
+    can.setFrequency_unsafe(BusFrequency::KHz_250);
+    
+    ASSERT_EQ(BusFrequency::KHz_250, static_cast<BusFrequency>(can.BTR & 0x1FF));
     ASSERT_FALSE((can.MCR & 0x1) == 0x1); //Ensure we didn't try to enter into init mode
 }
 
 TEST_F(CANTests, TestSetFrequency) {
     using namespace std::literals;
-    using CAN = CAN::CAN;
+    using BusFrequency = bxCAN::CANPort::BusFrequency;
+    using Mode = bxCAN::CANPort::Mode;
     
     auto asyncHW = [this]() {
         //Wait for an init mode request
@@ -272,12 +281,12 @@ TEST_F(CANTests, TestSetFrequency) {
     };
     std::thread async(asyncHW);
     
-    can.setFrequency(CAN::BusFrequency::KHz_20);
+    can.setFrequency(BusFrequency::KHz_20);
     async.join();
     
     ASSERT_FALSE((can.MSR & 0x1) == 0x1); //Ensure we aren't still in init mode
     ASSERT_FALSE((can.MCR & 0x1) == 0x1);
-    ASSERT_EQ(CAN::BusFrequency::KHz_20, static_cast<CAN::BusFrequency>(can.BTR & 0x1FF));
+    ASSERT_EQ(BusFrequency::KHz_20, static_cast<BusFrequency>(can.BTR & 0x1FF));
 }
 
 TEST_F(CANTests, TestAvailableTXMailbox) {
@@ -322,7 +331,7 @@ TEST_F(CANTests, TestTransmitMessage_usesFirstAvailableMailbox) {
     testMessage.data[3] = 201;
     
     ASSERT_EQ(-1, can.transmitMessage(testMessage));
-    ASSERT_EQ(0, memcmp(&can, &untouched, sizeof(CAN::CAN))); //Ensure we didn't try to write anything out
+    ASSERT_EQ(0, memcmp(&can, &untouched, sizeof(bxCAN::CANPort))); //Ensure we didn't try to write anything out
     
     can.TSR |= 0x1 << 26; //Set mb 0 empty
     ASSERT_EQ(0, can.transmitMessage(testMessage));
@@ -580,7 +589,7 @@ TEST_F(CANTests, TestGetTXErrorCount) {
 }
 
 TEST_F(CANTests, TestGetLastErrorCode) {
-    using ErrorCode = CAN::CAN::ErrorCode;
+    using ErrorCode = bxCAN::CANPort::ErrorCode;
     
     ASSERT_EQ(ErrorCode::NoError, can.getLastErrorCode());
     can.ESR = static_cast<uint8_t>(ErrorCode::BitDominantError) << 4;
@@ -607,8 +616,8 @@ TEST_F(CANTests, TestIsInErrorPassiveState) {
 
 TEST_F(CANTests, TestFilterStructs) {
     //Test the single id struct
-    ASSERT_EQ(4, sizeof(CAN::Filters::SingleIDFilter_t));
-    CAN::Filters::SingleIDFilter_t singleId{0};
+    ASSERT_EQ(4, sizeof(bxCAN::Filters::SingleIDFilter_t));
+    bxCAN::Filters::SingleIDFilter_t singleId{0};
     uint32_t& rawSingleId = *reinterpret_cast<uint32_t*>(&singleId);
     singleId.ide = 1;
     ASSERT_TRUE((rawSingleId & 0x4) == 0x4);
@@ -620,8 +629,8 @@ TEST_F(CANTests, TestFilterStructs) {
     ASSERT_TRUE((rawSingleId >> 3) == 0x12345678);
     
     //Test the single mask struct
-    ASSERT_EQ(4, sizeof(CAN::Filters::SingleMaskFilter_t));
-    CAN::Filters::SingleMaskFilter_t singleMask{0};
+    ASSERT_EQ(4, sizeof(bxCAN::Filters::SingleMaskFilter_t));
+    bxCAN::Filters::SingleMaskFilter_t singleMask{0};
     uint32_t& rawSingleMask = *reinterpret_cast<uint32_t*>(&singleMask);
     singleMask.id_mask = 0x12345678;
     ASSERT_EQ(0x12345678, rawSingleMask >> 3);
@@ -633,8 +642,8 @@ TEST_F(CANTests, TestFilterStructs) {
     ASSERT_EQ(0x2, rawSingleMask & 0x2);
     
     //Test the Dual ID struct
-    ASSERT_EQ(2, sizeof(CAN::Filters::DualIDFilter_t));
-    CAN::Filters::DualIDFilter_t dualId{0};
+    ASSERT_EQ(2, sizeof(bxCAN::Filters::DualIDFilter_t));
+    bxCAN::Filters::DualIDFilter_t dualId{0};
     uint16_t& rawDualId = *reinterpret_cast<uint16_t*>(&dualId);
     dualId.id = 0x7A8;
     ASSERT_EQ(0x7A8, rawDualId >> 5);
@@ -649,8 +658,8 @@ TEST_F(CANTests, TestFilterStructs) {
     ASSERT_EQ(0x5, rawDualId);
     
     //Test the Dual Mask struct
-    ASSERT_EQ(2, sizeof(CAN::Filters::DualMaskFilter_t));
-    CAN::Filters::DualMaskFilter_t dualMask{0};
+    ASSERT_EQ(2, sizeof(bxCAN::Filters::DualMaskFilter_t));
+    bxCAN::Filters::DualMaskFilter_t dualMask{0};
     uint16_t& rawDualMask = *reinterpret_cast<uint16_t*>(&dualMask);
     dualMask.id_mask = 0x7A8;
     ASSERT_EQ(0x7A8, rawDualMask >> 5);
@@ -692,7 +701,7 @@ TEST_F(CANTests, TestAssignFilterToFIFO) {
 }
 
 TEST_F(CANTests, TestConfigureSingleMaskFilter) {
-    using Filters = CAN::Filters;
+    using Filters = bxCAN::Filters;
     Filters::SingleIDFilter_t id{0};
     Filters::SingleMaskFilter_t mask{0};
     //Set some values
@@ -718,7 +727,7 @@ TEST_F(CANTests, TestConfigureSingleMaskFilter) {
 }
 
 TEST_F(CANTests, TestConfigureSingleIDListFilter) {
-    using Filters = CAN::Filters;
+    using Filters = bxCAN::Filters;
     Filters::SingleIDFilter_t id{0};
     Filters::SingleIDFilter_t id2{0};
     //Set some values
@@ -744,7 +753,7 @@ TEST_F(CANTests, TestConfigureSingleIDListFilter) {
 }
 
 TEST_F(CANTests, TestConfigureDualMaskFilter) {
-    using Filters = CAN::Filters;
+    using Filters = bxCAN::Filters;
     Filters::DualIDFilter_t id1{0};
     Filters::DualMaskFilter_t mask1{0};
     Filters::DualIDFilter_t id2{0};
@@ -782,7 +791,7 @@ TEST_F(CANTests, TestConfigureDualMaskFilter) {
 }
 
 TEST_F(CANTests, TestConfigureDualIDListFilter) {
-    using Filters = CAN::Filters;
+    using Filters = bxCAN::Filters;
     Filters::DualIDFilter_t id1{0};
     Filters::DualIDFilter_t id2{0};
     Filters::DualIDFilter_t id3{0};
