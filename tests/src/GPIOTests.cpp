@@ -106,6 +106,14 @@ protected:
  GPIO::GPIOPort GPIOPinTest::testPort;
 
 
+TEST_F(GPIOPinTest, TestConstructor) {
+    GPIO::GPIOPin<fakePort, 5, GPIO::AlternateFunction::AF11> testPin;
+    ASSERT_EQ(GPIO::AlternateFunction::AF11, static_cast<GPIO::AlternateFunction>((testPort.AFL >> 20) & 0xF));
+    
+    GPIO::GPIOPin<fakePort, 11, GPIO::AlternateFunction::AF8> test2Pin;
+    ASSERT_EQ(GPIO::AlternateFunction::AF8, static_cast<GPIO::AlternateFunction>((testPort.AFH >> 12) & 0xF));
+}
+
 TEST_F(GPIOPinTest, TestSetMode) {
     
     testPort.MODE = 0;

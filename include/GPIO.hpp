@@ -79,9 +79,9 @@ namespace GPIO {
         
         GPIOPin() {
             //Setup the pin's alternate function
-            dev_reg32_t afReg = (pin > 7) ? port().AFH : port().AFL;
+            dev_reg32_t& afReg = (pin > 7) ? port().AFH : port().AFL;
             constexpr uint8_t regShift = (pin % 8) * 4;
-            afReg &= ~(static_cast<uint32_t>(AlternateFunction::AF15)) << regShift; // clear the current AF
+            afReg &= ~(static_cast<uint32_t>(AlternateFunction::AF15) << regShift); // clear the current AF
             afReg |= static_cast<uint32_t>(af) << regShift;
         }
         
