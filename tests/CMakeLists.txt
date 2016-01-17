@@ -14,7 +14,8 @@ set(BEDROCK_TEST_SRCS src/main.cpp
                       src/SystemControlTests.cpp
                       src/NVICTests.cpp
                       src/SysTickTests.cpp
-                      src/InterruptManagerTests.cpp)
+                      src/InterruptManagerTests.cpp
+                      src/SysConfigTests.cpp)
 
 set(BEDROCK_SRCS ../src/InterruptManager.cpp)
 
