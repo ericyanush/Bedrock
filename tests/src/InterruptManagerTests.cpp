@@ -27,6 +27,12 @@ protected:
     
     IntMan im;
     
+    // Variable and method for testing setHandler
+    static bool handlerCalled;
+    static void testHandler() {
+        handlerCalled = true;
+    }
+    
     virtual void SetUp() {
         im.init(fakeSCB, fakeNVIC);
     }
@@ -34,6 +40,7 @@ protected:
 
 NVIC InterruptManagerTests::nvic{0};
 SystemControl InterruptManagerTests::scb{0};
+bool InterruptManagerTests::handlerCalled = false;
 
 TEST_F(InterruptManagerTests, TestSetPriorityForInterrupt) {
     IntMan::setPriorityForInterrupt(InterruptVector::Comparator1_2_3, 3);
@@ -54,13 +61,10 @@ TEST_F(InterruptManagerTests, TestEnableInterrupt) {
 }
 
 TEST_F(InterruptManagerTests, TestSetHandler) {
-    bool calledHandler = false;
-    InterruptHandler testHandler = [&calledHandler]() {
-        calledHandler = true;
-    };
+    handlerCalled = false;
     
     IntMan::setHandlerForInterrupt(InterruptVector::Timer4, testHandler);
     scb.ICSR = (static_cast<int32_t>(InterruptVector::Timer4) + 16); //Set the currently executing vector
     interruptHandler(); // manually call the interrupt handler
-    ASSERT_TRUE(calledHandler);
+    ASSERT_TRUE(handlerCalled);
 }

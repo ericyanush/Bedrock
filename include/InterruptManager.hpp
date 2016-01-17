@@ -12,9 +12,8 @@
 #include "NVIC.hpp"
 #include "SystemControl.hpp"
 #include "Interrupts.hpp"
-#include <functional>
 
-using InterruptHandler = std::function<void(void)>;
+using InterruptHandler = void (*)(void);
 
 extern "C" {
     void interruptHandler();
