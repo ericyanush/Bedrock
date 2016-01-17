@@ -180,6 +180,7 @@ TEST_F(CANTests, TestInit_defaults) {
 TEST_F(CANTests, TestInit) {
     using namespace std::literals;
     using CAN = CAN::CAN;
+    can.MCR |= 0x2; //Set the sleep bit, as this is done automatically by hw on reset
     
     auto asyncHW = [this]() {
         //Wait for an init mode request
@@ -208,6 +209,7 @@ TEST_F(CANTests, TestInit) {
     ASSERT_FALSE((can.MCR & 0x10) == 0x10); //Ensure we have Automatic Retransmission enabled (NART bit not set)
     ASSERT_TRUE((can.MCR & 0x40) == 0x40); // Ensure we have Automatic Bus-off management enabled (ABOM bit set)
     ASSERT_FALSE((can.MCR & 0x80) == 0x80); //Ensure we have Time Triggered Mode disabled (TTCM bit not set)
+    ASSERT_FALSE((can.MCR & 0x2) == 0x2); //Ensure we have cleared the sleep mode bit
 }
 
 TEST_F(CANTests, TestSetMode_unsafe) {

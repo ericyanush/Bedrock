@@ -370,8 +370,8 @@ namespace CAN {
             BTR &= ~(SJW_RMASK | TS2_RMASK | TS1_RMASK | PRE_RMASK | MODE_RMASK); // clear current vals
             BTR |= (TS1 | TS2 | SJW | pre_val | mod_val); // Set the new values
             
-            //Enable Automatic Retransmission, Automatic Bus-off, and disable Time-triggered mode
-            MCR &= ~((ENABLE << 7) | (ENABLE << 4)); //Disable TTCM and NART
+            //Enable Automatic Retransmission, Automatic Bus-off, and disable Time-triggered mode and Sleep mode
+            MCR &= ~((ENABLE << 7) | (ENABLE << 4) | (ENABLE << 1)); //Disable TTCM and NART
             MCR |= (ENABLE << 6); // Enable ABOM
             
             exitInitMode();
