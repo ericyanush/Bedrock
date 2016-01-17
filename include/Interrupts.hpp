@@ -97,5 +97,6 @@ enum class InterruptVector
     SPI4                         = 84,
 };
 
+constexpr uint32_t MAX_VECTOR = 84;
 
 #endif /* Interrupts_h */
