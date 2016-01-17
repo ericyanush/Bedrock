@@ -9,7 +9,7 @@
 #include "NVIC.hpp"
 #include "gtest/gtest.h"
 
-enum class Irq : int32_t {
+enum class InterruptVector : int32_t {
     Zero,
     One,
     Two,
@@ -38,10 +38,10 @@ protected:
 };
 
 TEST_F(NVICTests, TestEnableIrq) {
-    nvic.enableIrq<Irq::Three>();
+    nvic.enableIrq(InterruptVector::Three);
     
     //Cast the interrupt to it's underlying number
-    constexpr uint32_t intNumber = static_cast<uint32_t>(Irq::Three);
+    constexpr uint32_t intNumber = static_cast<uint32_t>(InterruptVector::Three);
     constexpr uint32_t regNumber = intNumber / 32;
     constexpr uint32_t bitOffset = intNumber % 32;
     
@@ -52,10 +52,10 @@ TEST_F(NVICTests, TestEnableIrq) {
 }
 
 TEST_F(NVICTests, TestDisableIrq) {
-    nvic.disableIrq<Irq::SixyThree>();
+    nvic.disableIrq(InterruptVector::SixyThree);
     
     //Cast the interrupt to it's underlying number
-    uint32_t intNumber = static_cast<uint32_t>(Irq::SixyThree);
+    uint32_t intNumber = static_cast<uint32_t>(InterruptVector::SixyThree);
     uint32_t regNumber = intNumber / 32;
     uint32_t bitOffset = intNumber % 32;
     
@@ -65,15 +65,15 @@ TEST_F(NVICTests, TestDisableIrq) {
 }
 
 TEST_F(NVICTests, TestSetPriority) {
-    nvic.setIrqPriority<Irq::ThirtyOne>(12);
-    constexpr uint32_t intNum = static_cast<uint32_t>(Irq::ThirtyOne);
+    nvic.setIrqPriority(InterruptVector::ThirtyOne, 12);
+    constexpr uint32_t intNum = static_cast<uint32_t>(InterruptVector::ThirtyOne);
     ASSERT_EQ(12, nvic.IPR[intNum]);
     nvic.IPR[intNum] = 0;
     ASSERT_EQ(true, nvicIsInInitState());
 }
 
 TEST_F(NVICTests, TestGetPriority) {
-    constexpr uint32_t intNum = static_cast<uint32_t>(Irq::Five);
+    constexpr uint32_t intNum = static_cast<uint32_t>(InterruptVector::Five);
     nvic.IPR[intNum] = 21;
-    ASSERT_EQ(21, nvic.getIrqPriority<Irq::Five>());
+    ASSERT_EQ(21, nvic.getIrqPriority(InterruptVector::Five));
 }

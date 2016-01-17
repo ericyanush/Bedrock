@@ -21,40 +21,32 @@ public:
     dev_reg32_t IABR[3];
     dev_reg8_t IPR[60 * 4]; //byte aligned access is allowed
     
-    template<Irq interrupt>
-    void enableIrq() {
-        static_assert(static_cast<int32_t>(interrupt) > 0, "Cannot modify system interrupts with this function");
-        constexpr uint32_t intNum = static_cast<uint32_t>(interrupt);
-        constexpr uint32_t regIndex = intNum / 32;
-        constexpr uint32_t bitIndex = intNum % 32;
+    void enableIrq(InterruptVector interrupt) {
+        const uint32_t intNum = static_cast<uint32_t>(interrupt);
+        const uint32_t regIndex = intNum / 32;
+        const uint32_t bitIndex = intNum % 32;
         //We eliminate a read of the register, as writing 0's to any bit position
         //   have no effect
         ISER[regIndex] = ENABLE << bitIndex;
     }
     
-    template<Irq interrupt>
-    void disableIrq() {
-        static_assert(static_cast<int32_t>(interrupt) > 0, "Cannot modify system interrupts with this function");
-        constexpr uint32_t intNum = static_cast<uint32_t>(interrupt);
-        constexpr uint32_t regIndex = intNum / 32;
-        constexpr uint32_t bitIndex = intNum % 32;
+    void disableIrq(InterruptVector interrupt) {
+        const uint32_t intNum = static_cast<uint32_t>(interrupt);
+        const uint32_t regIndex = intNum / 32;
+        const uint32_t bitIndex = intNum % 32;
         
         //We eliminate a read of the register, as writing 0's to any bit position
         //   have no effect
         ICER[regIndex] = ENABLE << bitIndex; // This register is rc_w1, so we are "Enabling the Disable"
     }
     
-    template<Irq interrupt>
-    void setIrqPriority(uint8_t priority) {
-        static_assert(static_cast<int32_t>(interrupt) > 0, "Cannot modify system interrupts with this function");
-        constexpr uint32_t intNum = static_cast<uint32_t>(interrupt);
+    void setIrqPriority(InterruptVector interrupt, uint8_t priority) {
+        const uint32_t intNum = static_cast<uint32_t>(interrupt);
         IPR[intNum] = priority;
     }
     
-    template<Irq interrupt>
-    uint8_t getIrqPriority() {
-        static_assert(static_cast<int32_t>(interrupt) > 0, "Cannot modify system interrupts with this function");
-        constexpr uint32_t intNum = static_cast<uint32_t>(interrupt);
+    uint8_t getIrqPriority(InterruptVector interrupt) {
+        const uint32_t intNum = static_cast<uint32_t>(interrupt);
         return IPR[intNum];
     }
 };
