@@ -106,11 +106,11 @@ protected:
  GPIO::GPIOPort GPIOPinTest::testPort;
 
 
-TEST_F(GPIOPinTest, TestConstructor) {
-    GPIO::GPIOPin<fakePort, 5, GPIO::AlternateFunction::AF11> testPin;
+TEST_F(GPIOPinTest, TestSetAlternateFunction) {
+    five.setAlternateFunction(GPIO::AlternateFunction::AF11);
     ASSERT_EQ(GPIO::AlternateFunction::AF11, static_cast<GPIO::AlternateFunction>((testPort.AFL >> 20) & 0xF));
     
-    GPIO::GPIOPin<fakePort, 11, GPIO::AlternateFunction::AF8> test2Pin;
+    eleven.setAlternateFunction(GPIO::AlternateFunction::AF8);
     ASSERT_EQ(GPIO::AlternateFunction::AF8, static_cast<GPIO::AlternateFunction>((testPort.AFH >> 12) & 0xF));
 }
 

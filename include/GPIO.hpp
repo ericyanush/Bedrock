@@ -71,13 +71,13 @@ namespace GPIO {
      */
     using GPIOPortProvider = GPIOPort& (*)(void);
     
-    template <GPIOPortProvider port, uint8_t pin, AlternateFunction af = AlternateFunction::AF0>
+    template <GPIOPortProvider port, uint8_t pin>
     class GPIOPin {
     private:
         static_assert(pin >= 0 && pin <= 15, "Pin Number out of range!");
     public:
         
-        GPIOPin() {
+        static void setAlternateFunction(AlternateFunction af) {
             //Setup the pin's alternate function
             dev_reg32_t& afReg = (pin > 7) ? port().AFH : port().AFL;
             constexpr uint8_t regShift = (pin % 8) * 4;
