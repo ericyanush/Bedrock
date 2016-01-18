@@ -9,6 +9,11 @@
 #include "gtest/gtest.h"
 #include "RCC.hpp"
 
+//Includes for async tests (clock config)
+#include <thread>
+#include <future>
+#include <chrono>
+
 class RCCTest : public ::testing::Test {
   
 protected:
@@ -104,13 +109,49 @@ TEST_F(RCCTest, TestInit) {
     
     rcc.init();
     
-    ASSERT_EQ(true, (rcc.CR & RCC_CR_HSION) == RCC_CR_HSION);
-    ASSERT_EQ(false, (rcc.CR & RCC_CR_CSSON) == RCC_CR_CSSON);
-    ASSERT_EQ(false, (rcc.CR & RCC_CR_HSEON) == RCC_CR_HSEON);
-    ASSERT_EQ(false, (rcc.CR & RCC_CR_PLLON) == RCC_CR_PLLON);
-    ASSERT_EQ(false, (rcc.CR & RCC_CR_HSEBYP) == RCC_CR_HSEBYP);
+    ASSERT_EQ(true, (rcc.CR & (1 << 0)) == (1 << 0));
+    ASSERT_EQ(false, (rcc.CR & (1 << 19)) == (1 << 19));
+    ASSERT_EQ(false, (rcc.CR & (1 << 16)) == (1 << 16));
+    ASSERT_EQ(false, (rcc.CR & (1 << 24)) == (1 << 24));
+    ASSERT_EQ(false, (rcc.CR & (1 << 18)) == (1 << 18));
     ASSERT_EQ(0, rcc.CFG);
     ASSERT_EQ(0, rcc.CFG2);
     ASSERT_EQ(0, rcc.CFG3);
     ASSERT_EQ(0, rcc.CI);
+}
+
+TEST_F(RCCTest, TestConfigSystemClock) {
+    using namespace std::literals;
+    
+    auto asyncHW = [this]() {
+        //Wait for HSE enable request
+        while ((rcc.CR & (1 << 16)) != (1 << 16)) {
+            std::this_thread::sleep_for(100us);
+        }
+        rcc.CR |= (1 << 17); // set the HSERDY bit
+        
+        //Wait for PLL enable request
+        while ((rcc.CR & (1 << 24)) != (1 << 24)) {
+            std::this_thread::sleep_for(100us);
+        }
+        rcc.CR |= (1 << 25);
+        
+        //wait for SysClock switch to PLL
+        while ((rcc.CFG & 0b11) != static_cast<uint32_t>(RCC::SysClockSource::PLL)) {
+            std::this_thread::sleep_for(100us);
+        }
+        //Acknowledge the clock switchs
+        rcc.CFG |= (static_cast<uint32_t>(RCC::SysClockSource::PLL) << 2);
+    };
+    std::thread async(asyncHW);
+
+    rcc.configSystemClock<nullptr, RCC::PLLMultiplier::Three, RCC::SysClockPrescale::DIV2, RCC::APBPrescale::DIV8, RCC::APBPrescale::DIV4>();
+    async.join();
+    
+    ASSERT_TRUE((rcc.CR & (1 << 16)) == (1 << 16)); //Ensure HSE has been enabled
+    ASSERT_TRUE((rcc.CFG & (1 << 16)) == (1 << 16)); //Ensure PLL source has been set to HSE with no PREDIV
+    ASSERT_TRUE((rcc.CFG & (0b1111 << 18)) == (static_cast<uint32_t>(RCC::PLLMultiplier::Three) << 18)); // Ensure the PLL multiplier is setup correctly
+    ASSERT_TRUE((rcc.CFG & (0b1111 << 4)) == (static_cast<uint32_t>(RCC::SysClockPrescale::DIV2) << 4)); //Ensure Sysclock prescaler is setup correctly
+    ASSERT_TRUE((rcc.CFG & (0b111 << 8)) == (static_cast<uint32_t>(RCC::APBPrescale::DIV8) << 8)); // Ensure APB1 Prescaler is set right
+    ASSERT_TRUE((rcc.CFG & (0b111 << 11)) == (static_cast<uint32_t>(RCC::APBPrescale::DIV4) << 11)); //Ensure APB2 Prescaler is set right
 }

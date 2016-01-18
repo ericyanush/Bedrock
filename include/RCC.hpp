@@ -11,12 +11,16 @@
 
 #include "types.hpp"
 #include "Flash.hpp"
-#include "stm32f303xe.h"
 
 class RCC {
 public:
     
     void init() {
+        constexpr uint32_t RCC_CR_HSION = (1 << 0);
+        constexpr uint32_t RCC_CR_CSSON = (1 << 19);
+        constexpr uint32_t RCC_CR_HSEON = (1 << 16);
+        constexpr uint32_t RCC_CR_PLLON = (1 << 24);
+        constexpr uint32_t RCC_CR_HSEBYP = (1 << 18);
         //ensure HSI is on
         CR |= RCC_CR_HSION;
         //Turn off CSS, HSE, PLL
@@ -33,38 +37,92 @@ public:
         CI = 0;
     }
     
-    template <FlashProvider flash>
+    enum class PLLMultiplier : uint8_t {
+        Two       = 0,
+        Three     = 1,
+        Four      = 2,
+        Five      = 3,
+        Six       = 4,
+        Seven     = 5,
+        Eight     = 6,
+        Nine      = 7,
+        Ten       = 8,
+        Eleven    = 9,
+        Twelve    = 10,
+        Thirteen  = 11,
+        Fourteen  = 12,
+        Fifteen   = 13,
+        Sixteen   = 14,
+        Sixteen2  = 15 //This provides an identical multiplier as Sixteen, defined for compatibilty
+    };
+    
+    enum class SysClockPrescale : uint8_t {
+        None   = 0,
+        DIV2   = 0b1000,
+        DIV4   = 0b1001,
+        DIV8   = 0b1010,
+        DIV16  = 0b1011,
+        DIV64  = 0b1100,
+        DIV128 = 0b1101,
+        DIV256 = 0b1110,
+        DIV512 = 0b1111
+    };
+    
+    enum class APBPrescale : uint8_t {
+        None  = 0,
+        DIV2  = 0b100,
+        DIV4  = 0b101,
+        DIV8  = 0b110,
+        DIV16 = 0b111
+    };
+    
+    enum class SysClockSource : uint8_t {
+        HSI = 0,
+        HSE = 1,
+        PLL = 2
+    };
+    
+    template <FlashProvider flash, PLLMultiplier pllMult, SysClockPrescale sysPrescale,
+              APBPrescale apb1Prescale, APBPrescale apb2Prescale>
     void configSystemClock() {
+        constexpr uint32_t PLLSRC_HSE_PREDIV = (1 << 16);
+        constexpr uint32_t RCC_CR_HSEON = (1 << 16);
+        constexpr uint32_t RCC_CR_HSERDY = (1 << 17);
+        constexpr uint32_t RCC_CR_PLLON = (1 << 24);
+        constexpr uint32_t RCC_CR_PLLRDY = (1 << 25);
+        
         //Enable the HSE, and wait for it to be ready
         CR |= RCC_CR_HSEON;
         while(!(CR & RCC_CR_HSERDY));
         
         //Configure the PLL to use HSE with a Prescaler of 1 and a multiplier of 9
-        CFG |= (RCC_CFGR_PLLSRC_HSE_PREDIV | RCC_CFGR_PLLXTPRE_HSE_PREDIV_DIV1 | RCC_CFGR_PLLMUL9);
+        CFG |= (PLLSRC_HSE_PREDIV | (static_cast<uint32_t>(pllMult) << 18));
         
         //Configure the Bus prescalers
-        CFG &= ~(RCC_CFGR_HPRE); // Clear the AHB bus prescaler
-        CFG |= RCC_CFGR_HPRE_DIV1; // Set the AHB bus prescaler to 1 (72MHz)
+        CFG &= ~(0b1111 << 4); // Clear the AHB bus prescaler
+        CFG |= (static_cast<uint32_t>(sysPrescale) << 4); // Set the AHB bus prescaler
         
-        CFG &= ~(RCC_CFGR_PPRE1); // Clear the APB1 bus prescaler
-        CFG |= RCC_CFGR_PPRE1_DIV2; // Set APB1 prescaler to 2 (36MHz)
+        CFG &= ~(0b111 << 8); // Clear the APB1 bus prescaler
+        CFG |= (static_cast<uint32_t>(apb1Prescale) << 8); // Set APB1 prescaler
         
-        CFG &= ~(RCC_CFGR_PPRE2); // Clear the APB2 bus prescaler
-        CFG |= RCC_CFGR_PPRE2_DIV1; // Set APB2 prescaler to 1 (72MHz)
+        CFG &= ~(0b111 << 11); // Clear the APB2 bus prescaler
+        CFG |= (static_cast<uint32_t>(apb2Prescale) << 11); // Set APB2 prescaler
         
-        //Setup the flash latency
-        flash().setLatency(FlashWait::two); //Set the flash latency to 2WS
-        flash().enablePrefetch(); // Enable the flash prefetch buffer
+        //Setup the flash latency, used only for CM4 (STM32F3)
+        if (flash != nullptr) {
+            flash().setLatency(FlashWait::two); //Set the flash latency to 2WS
+            flash().enablePrefetch(); // Enable the flash prefetch buffer
+        }
         
         //Enable the PLL and wait for it to be ready
         CR |= RCC_CR_PLLON;
         while(!(CR & RCC_CR_PLLRDY));
         
         //Switch sysclock to PLL
-        CFG &= ~RCC_CFGR_SW; // Clear the sysclock source
-        CFG |= RCC_CFGR_SW_PLL; // Set the sysclock to PLL
+        CFG &= ~(0b11); // Clear the sysclock source
+        CFG |= static_cast<uint32_t>(SysClockSource::PLL); // Set the sysclock to PLL
         //Wait for switch
-        while(!((CFG & RCC_CFGR_SWS_PLL) == RCC_CFGR_SWS_PLL));
+        while(!((CFG & (0b11 << 2)) == (static_cast<uint32_t>(SysClockSource::PLL) << 2)));
     }
     
     void enableGPIOA() {

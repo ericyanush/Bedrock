@@ -11,7 +11,6 @@
 
 #include <stdint.h>
 #include "types.hpp"
-#include "stm32f303xe.h"
 
 enum class FlashWait : uint8_t {
     zero = 0b000,
@@ -29,11 +28,11 @@ public:
     }
     
     void enablePrefetch() {
-        AC |= FLASH_ACR_PRFTBE;
+        AC |= (1 << 4);
     }
     
     void disablePrefetch() {
-        AC &= ~FLASH_ACR_PRFTBE;
+        AC &= ~(1 << 4);
     }
     
     dev_reg32_t AC;
