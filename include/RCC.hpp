@@ -103,6 +103,10 @@ public:
         APB1ENR |= (ENABLE << 25);
     }
     
+    void enableTimer2() {
+        APB1ENR |= (ENABLE << 0);
+    }
+    
     dev_reg32_t CR;
     dev_reg32_t CFG;
     dev_reg32_t CI;
