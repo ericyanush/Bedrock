@@ -79,3 +79,14 @@ TEST_F(SysTickTests, TestGetCurrentCount) {
     tick.VAL = 0x00ABCDEE;
     ASSERT_EQ(0x00ABCDEE, tick.getCurrentCount());
 }
+
+TEST_F(SysTickTests, TestSetClockSourceAHB) {
+    tick.setClockSourceAHB();
+    ASSERT_TRUE(((tick.CTRL >> 2) & 0x1) == 0x1);
+}
+
+TEST_F(SysTickTests, TestSetClockSourceAHB_DIV_8) {
+    tick.CTRL |= (1 << 2);
+    tick.setClockSourceAHB_DIV_8();
+    ASSERT_EQ(0, tick.CTRL);
+}

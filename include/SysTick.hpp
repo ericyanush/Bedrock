@@ -41,6 +41,14 @@ public:
         return VAL;
     }
     
+    void setClockSourceAHB() {
+        CTRL |= (ENABLE << 2);
+    }
+    
+    void setClockSourceAHB_DIV_8() {
+        CTRL &= ~(ENABLE << 2);
+    }
+    
     dev_reg32_t CTRL;
     dev_reg32_t LOAD;
     dev_reg32_t VAL;
