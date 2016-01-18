@@ -13,6 +13,7 @@ enum class InterruptVector
 {
     /** Cortex-M4 Processor Exceptions */
     NonMaskableInt         = -14,
+    HardFault              = -13,
     MemoryManagement       = -12,                            
     BusFault               = -11,                            
     UsageFault             = -10,                            
