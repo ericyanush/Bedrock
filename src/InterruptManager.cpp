@@ -24,19 +24,19 @@ extern "C" {
     }
 }
 
-static void init(SystemControlProvider sysCtl, NVICProvider nvic) {
+void InterruptManager::init(SystemControlProvider sysCtl, NVICProvider nvic) {
     SCB = &sysCtl();
     NVIC = &nvic();
 }
-static void setHandlerForInterrupt(InterruptVector vector, InterruptHandler handler) {
+void InterruptManager::setHandlerForInterrupt(InterruptVector vector, InterruptHandler handler) {
     handlers[static_cast<uint32_t>(vector)] = handler;
 }
-static void enableInterrupt(InterruptVector vector) {
+void InterruptManager::enableInterrupt(InterruptVector vector) {
     NVIC->enableIrq(vector);
 }
-static void disableInterrupt(InterruptVector vector) {
+void InterruptManager::disableInterrupt(InterruptVector vector) {
     NVIC->disableIrq(vector);
 }
-static void setPriorityForInterrupt(InterruptVector vector, uint8_t priority) {
+void InterruptManager::setPriorityForInterrupt(InterruptVector vector, uint8_t priority) {
     NVIC->setIrqPriority(vector, (uint8_t)(priority << 4)); // The processor only uses the upper 4 bits of the byte
 }
