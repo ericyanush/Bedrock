@@ -21,27 +21,13 @@ extern "C" {
 
 class InterruptManager {
 public:
-    static void init(SystemControlProvider sysCtl, NVICProvider nvic) {
-        SCB = &sysCtl();
-        NVIC = &nvic();
-    }
-    static void setHandlerForInterrupt(InterruptVector vector, InterruptHandler handler) {
-        handlers[static_cast<uint32_t>(vector)] = handler;
-    }
-    static void enableInterrupt(InterruptVector vector) {
-        NVIC->enableIrq(vector);
-    }
-    static void disableInterrupt(InterruptVector vector) {
-        NVIC->disableIrq(vector);
-    }
-    static void setPriorityForInterrupt(InterruptVector vector, uint8_t priority) {
-        NVIC->setIrqPriority(vector, (uint8_t)(priority << 4)); // The processor only uses the upper 4 bits of the byte
-    }
+    static void init(SystemControlProvider sysCtl, NVICProvider nvic);
+    static void setHandlerForInterrupt(InterruptVector vector, InterruptHandler handler);
+    static void enableInterrupt(InterruptVector vector);
+    static void disableInterrupt(InterruptVector vector);
+    static void setPriorityForInterrupt(InterruptVector vector, uint8_t priority);
     
 private:
-    static SystemControl* SCB;
-    static NVIC* NVIC;
-    static InterruptHandler handlers[MAX_VECTOR];
     friend void interruptHandler();
 };
 

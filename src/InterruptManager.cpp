@@ -9,17 +9,34 @@
 #include "InterruptManager.hpp"
 #include "Interrupts.hpp"
 
-SystemControl* InterruptManager::SCB;
-NVIC* InterruptManager::NVIC;
+static SystemControl* SCB;
+static NVIC* NVIC;
 
-InterruptHandler InterruptManager::handlers[MAX_VECTOR];
+static InterruptHandler handlers[MAX_VECTOR];
 
 extern "C" {
     void interruptHandler() {
-        InterruptVector activeVect = InterruptManager::SCB->getActiveVector();
+        InterruptVector activeVect = SCB->getActiveVector();
         int32_t vecNum = static_cast<int32_t>(activeVect); //Need to subtract 16 to get vector number
         if (InterruptManager::handlers[vecNum]) {
             InterruptManager::handlers[vecNum]();
         }
     }
+}
+
+static void init(SystemControlProvider sysCtl, NVICProvider nvic) {
+    SCB = &sysCtl();
+    NVIC = &nvic();
+}
+static void setHandlerForInterrupt(InterruptVector vector, InterruptHandler handler) {
+    handlers[static_cast<uint32_t>(vector)] = handler;
+}
+static void enableInterrupt(InterruptVector vector) {
+    NVIC->enableIrq(vector);
+}
+static void disableInterrupt(InterruptVector vector) {
+    NVIC->disableIrq(vector);
+}
+static void setPriorityForInterrupt(InterruptVector vector, uint8_t priority) {
+    NVIC->setIrqPriority(vector, (uint8_t)(priority << 4)); // The processor only uses the upper 4 bits of the byte
 }
