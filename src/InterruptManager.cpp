@@ -9,14 +9,14 @@
 #include "InterruptManager.hpp"
 #include "Interrupts.hpp"
 
-SystemControlProvider InterruptManager::SCB;
-NVICProvider InterruptManager::NVIC;
+SystemControl* InterruptManager::SCB;
+NVIC* InterruptManager::NVIC;
 
 InterruptHandler InterruptManager::handlers[MAX_VECTOR];
 
 extern "C" {
     void interruptHandler() {
-        InterruptVector activeVect = InterruptManager::SCB().getActiveVector();
+        InterruptVector activeVect = InterruptManager::SCB->getActiveVector();
         int32_t vecNum = static_cast<int32_t>(activeVect); //Need to subtract 16 to get vector number
         if (InterruptManager::handlers[vecNum]) {
             InterruptManager::handlers[vecNum]();

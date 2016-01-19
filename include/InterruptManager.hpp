@@ -22,25 +22,25 @@ extern "C" {
 class InterruptManager {
 public:
     static void init(SystemControlProvider sysCtl, NVICProvider nvic) {
-        SCB = sysCtl;
-        NVIC = nvic;
+        SCB = &sysCtl();
+        NVIC = &nvic();
     }
     static void setHandlerForInterrupt(InterruptVector vector, InterruptHandler handler) {
         handlers[static_cast<uint32_t>(vector)] = handler;
     }
     static void enableInterrupt(InterruptVector vector) {
-        NVIC().enableIrq(vector);
+        NVIC->enableIrq(vector);
     }
     static void disableInterrupt(InterruptVector vector) {
-        NVIC().disableIrq(vector);
+        NVIC->disableIrq(vector);
     }
     static void setPriorityForInterrupt(InterruptVector vector, uint8_t priority) {
-        NVIC().setIrqPriority(vector, (uint8_t)(priority << 4)); // The processor only uses the upper 4 bits of the byte
+        NVIC->setIrqPriority(vector, (uint8_t)(priority << 4)); // The processor only uses the upper 4 bits of the byte
     }
     
 private:
-    static SystemControlProvider SCB;
-    static NVICProvider NVIC;
+    static SystemControl* SCB;
+    static NVIC* NVIC;
     static InterruptHandler handlers[MAX_VECTOR];
     friend void interruptHandler();
 };
