@@ -776,6 +776,8 @@ namespace bxCAN {
         
         Filters filters;
     };
+    
+    using CANPortProvider = CANPort& (*)(void);
 }
 
 #endif /* bxCan_h */
