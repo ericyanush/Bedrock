@@ -18,8 +18,8 @@ extern "C" {
     void interruptHandler() {
         InterruptVector activeVect = SCB->getActiveVector();
         int32_t vecNum = static_cast<int32_t>(activeVect); //Need to subtract 16 to get vector number
-        if (InterruptManager::handlers[vecNum]) {
-            InterruptManager::handlers[vecNum]();
+        if (handlers[vecNum]) {
+            handlers[vecNum]();
         }
     }
 }
