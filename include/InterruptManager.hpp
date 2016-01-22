@@ -13,22 +13,25 @@
 #include "SystemControl.hpp"
 #include "Interrupts.hpp"
 
-using InterruptHandler = void (*)(void);
+class InterruptHandler {
+public:
+    virtual void interruptHandler() = 0;
+};
 
 extern "C" {
-    void interruptHandler();
+    void interruptDispatcher();
 }
 
 class InterruptManager {
 public:
     static void init(SystemControlProvider sysCtl, NVICProvider nvic);
-    static void setHandlerForInterrupt(InterruptVector vector, InterruptHandler handler);
+    static void setHandlerForInterrupt(InterruptVector vector, InterruptHandler* handler);
     static void enableInterrupt(InterruptVector vector);
     static void disableInterrupt(InterruptVector vector);
     static void setPriorityForInterrupt(InterruptVector vector, uint8_t priority);
     
 private:
-    friend void interruptHandler();
+    friend void interruptDispatcher();
 };
 
 

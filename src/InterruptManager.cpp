@@ -12,14 +12,14 @@
 static SystemControl* SCB;
 static NVIC* NVIC;
 
-static InterruptHandler handlers[MAX_VECTOR];
+static InterruptHandler* handlers[MAX_VECTOR];
 
 extern "C" {
     void interruptHandler() {
         InterruptVector activeVect = SCB->getActiveVector();
         int32_t vecNum = static_cast<int32_t>(activeVect); //Need to subtract 16 to get vector number
         if (handlers[vecNum]) {
-            handlers[vecNum]();
+            handlers[vecNum]->interruptHandler();
         }
     }
 }
@@ -28,7 +28,7 @@ void InterruptManager::init(SystemControlProvider sysCtl, NVICProvider nvic) {
     SCB = &sysCtl();
     NVIC = &nvic();
 }
-void InterruptManager::setHandlerForInterrupt(InterruptVector vector, InterruptHandler handler) {
+void InterruptManager::setHandlerForInterrupt(InterruptVector vector, InterruptHandler* handler) {
     handlers[static_cast<uint32_t>(vector)] = handler;
 }
 void InterruptManager::enableInterrupt(InterruptVector vector) {
