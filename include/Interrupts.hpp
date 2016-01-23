@@ -9,7 +9,7 @@
 #ifndef Interrupts_h
 #define Interrupts_h
 
-enum class InterruptVector
+enum class InterruptVector : int32_t
 {
     /** Cortex-M4 Processor Exceptions */
     NonMaskableInt         = -14,
