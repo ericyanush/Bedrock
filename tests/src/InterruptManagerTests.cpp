@@ -9,6 +9,7 @@
 #include "gtest/gtest.h"
 #include "InterruptManager.hpp"
 
+using namespace Bedrock;
 
 class InterruptManagerTests : public testing::Test {
     
@@ -65,6 +66,6 @@ TEST_F(InterruptManagerTests, TestSetHandler) {
     
     IntMan::setHandlerForInterrupt(InterruptVector::Timer4, testHandler);
     scb.ICSR = (static_cast<int32_t>(InterruptVector::Timer4) + 16); //Set the currently executing vector
-    interruptHandler(); // manually call the interrupt handler
+    interruptDispatcher(); // manually call the interrupt handler
     ASSERT_TRUE(handlerCalled);
 }

@@ -9,6 +9,8 @@
 #include "gtest/gtest.h"
 #include "GPIO.hpp"
 
+using namespace Bedrock;
+
 class GPIOTest : public ::testing::Test {
     
 protected:

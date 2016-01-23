@@ -9,34 +9,34 @@
 #include "InterruptManager.hpp"
 #include "Interrupts.hpp"
 
-static SystemControl* SCB;
-static NVIC* NVIC;
+static Bedrock::SystemControl* scb;
+static Bedrock::NVIC* nvic;
 
-static InterruptHandler* handlers[MAX_VECTOR];
+static Bedrock::InterruptHandler handlers[MAX_VECTOR];
 
 extern "C" {
-    void interruptHandler() {
-        InterruptVector activeVect = SCB->getActiveVector();
+    void interruptDispatcher() {
+        InterruptVector activeVect = scb->getActiveVector();
         int32_t vecNum = static_cast<int32_t>(activeVect); //Need to subtract 16 to get vector number
         if (handlers[vecNum]) {
-            handlers[vecNum]->interruptHandler();
+            handlers[vecNum]();
         }
     }
 }
 
-void InterruptManager::init(SystemControlProvider sysCtl, NVICProvider nvic) {
-    SCB = &sysCtl();
-    NVIC = &nvic();
+void Bedrock::InterruptManager::init(SystemControlProvider sysCtl, NVICProvider intController) {
+    scb = &sysCtl();
+    nvic = &intController();
 }
-void InterruptManager::setHandlerForInterrupt(InterruptVector vector, InterruptHandler* handler) {
+void Bedrock::InterruptManager::setHandlerForInterrupt(InterruptVector vector, InterruptHandler handler) {
     handlers[static_cast<uint32_t>(vector)] = handler;
 }
-void InterruptManager::enableInterrupt(InterruptVector vector) {
-    NVIC->enableIrq(vector);
+void Bedrock::InterruptManager::enableInterrupt(InterruptVector vector) {
+    nvic->enableIrq(vector);
 }
-void InterruptManager::disableInterrupt(InterruptVector vector) {
-    NVIC->disableIrq(vector);
+void Bedrock::InterruptManager::disableInterrupt(InterruptVector vector) {
+    nvic->disableIrq(vector);
 }
-void InterruptManager::setPriorityForInterrupt(InterruptVector vector, uint8_t priority) {
-    NVIC->setIrqPriority(vector, (uint8_t)(priority << 4)); // The processor only uses the upper 4 bits of the byte
+void Bedrock::InterruptManager::setPriorityForInterrupt(InterruptVector vector, uint8_t priority) {
+    nvic->setIrqPriority(vector, (uint8_t)(priority << 4)); // The processor only uses the upper 4 bits of the byte
 }

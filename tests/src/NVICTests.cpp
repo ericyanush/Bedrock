@@ -9,6 +9,8 @@
 #include "NVIC.hpp"
 #include "gtest/gtest.h"
 
+using namespace Bedrock;
+
 enum class InterruptVector : int32_t {
     Zero,
     One,

@@ -14,6 +14,8 @@
 #include <future>
 #include <chrono>
 
+using namespace Bedrock;
+
 class RCCTest : public ::testing::Test {
   
 protected:

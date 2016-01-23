@@ -9,6 +9,7 @@
 #include "SystemControl.hpp"
 #include "gtest/gtest.h"
 
+using namespace Bedrock;
 
 enum class InterruptVector : int32_t {
     Minus10 = -10,

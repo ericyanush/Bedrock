@@ -12,27 +12,27 @@
 #include "NVIC.hpp"
 #include "SystemControl.hpp"
 #include "Interrupts.hpp"
-
-class InterruptHandler {
-public:
-    virtual void interruptHandler() = 0;
-};
+#include <functional>
 
 extern "C" {
     void interruptDispatcher();
 }
 
-class InterruptManager {
-public:
-    static void init(SystemControlProvider sysCtl, NVICProvider nvic);
-    static void setHandlerForInterrupt(InterruptVector vector, InterruptHandler* handler);
-    static void enableInterrupt(InterruptVector vector);
-    static void disableInterrupt(InterruptVector vector);
-    static void setPriorityForInterrupt(InterruptVector vector, uint8_t priority);
+namespace Bedrock {
+    using InterruptHandler = std::function<void(void)>;
     
-private:
-    friend void interruptDispatcher();
-};
+    class InterruptManager {
+    public:
+        static void init(SystemControlProvider sysCtl, NVICProvider nvic);
+        static void setHandlerForInterrupt(InterruptVector vector, InterruptHandler handler);
+        static void enableInterrupt(InterruptVector vector);
+        static void disableInterrupt(InterruptVector vector);
+        static void setPriorityForInterrupt(InterruptVector vector, uint8_t priority);
+        
+    private:
+        friend void interruptDispatcher();
+    };
 
+}
 
 #endif /* InterruptManager_hpp */

@@ -9,6 +9,7 @@
 #include "gtest/gtest.h"
 #include "Flash.hpp"
 
+using namespace Bedrock;
 
 /**
  Note: upon initializtion of the test fixture, the flash member object is initialized

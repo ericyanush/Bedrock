@@ -9,6 +9,8 @@
 #include "gtest/gtest.h"
 #include "GPTimer.hpp"
 
+using namespace Bedrock;
+
 /** 
  We will test only the 32bit wide timer, as the only difference is
  function signatures for some functions (32bit vs 16bit timer returing/taking 32/16 bit vals)

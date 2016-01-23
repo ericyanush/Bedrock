@@ -9,6 +9,8 @@
 #include "gtest/gtest.h"
 #include "SysConfig.hpp"
 
+using namespace Bedrock;
+
 /**
  Note: upon initializtion of the test fixture, the sysconf member object is initialized
  to all zeros. The sysconfIsInInitState function checks to see if the sysconf member object

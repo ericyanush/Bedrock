@@ -14,6 +14,7 @@
 #include <future>
 #include <chrono>
 
+using namespace Bedrock;
 
 /**
  Note: The tests which call enter/exit InitMode require they be run on a platform

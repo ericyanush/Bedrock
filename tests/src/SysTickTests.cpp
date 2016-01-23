@@ -9,6 +9,7 @@
 #include "SysTick.hpp"
 #include "gtest/gtest.h"
 
+using namespace Bedrock;
 
 /**
  Note: upon initializtion of the test fixture, the tick member object is initialized
