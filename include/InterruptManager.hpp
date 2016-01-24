@@ -30,7 +30,13 @@ namespace Bedrock {
         static void setPriorityForInterrupt(InterruptVector vector, uint8_t priority);
         
     private:
-        friend void interruptDispatcher();
+        //The smallest System Vector is -14 (NMI), so to handle it, we need to offset
+        //  all the vectors by this amount to position NMI at 0 in our handler array
+        static constexpr uint8_t SystemVectorsOffset = 14;
+        static SystemControl* scb;
+        static NVIC* nvic;
+        static InterruptHandler handlers[MAX_VECTOR + SystemVectorsOffset]; //Add 14 for system vectors
+        friend void ::interruptDispatcher();
     };
 
 }

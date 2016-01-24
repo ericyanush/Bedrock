@@ -28,12 +28,6 @@ protected:
     
     IntMan im;
     
-    // Variable and method for testing setHandler
-    static bool handlerCalled;
-    static void testHandler() {
-        handlerCalled = true;
-    }
-    
     virtual void SetUp() {
         im.init(fakeSCB, fakeNVIC);
     }
@@ -41,7 +35,6 @@ protected:
 
 NVIC InterruptManagerTests::nvic{0};
 SystemControl InterruptManagerTests::scb{0};
-bool InterruptManagerTests::handlerCalled = false;
 
 TEST_F(InterruptManagerTests, TestSetPriorityForInterrupt) {
     IntMan::setPriorityForInterrupt(InterruptVector::Comparator1_2_3, 3);
@@ -62,10 +55,26 @@ TEST_F(InterruptManagerTests, TestEnableInterrupt) {
 }
 
 TEST_F(InterruptManagerTests, TestSetHandler) {
-    handlerCalled = false;
+    bool handlerCalled = false;
+    
+    InterruptHandler testHandler = [&handlerCalled]() {
+        handlerCalled = true;
+    };
     
     IntMan::setHandlerForInterrupt(InterruptVector::Timer4, testHandler);
     scb.ICSR = (static_cast<int32_t>(InterruptVector::Timer4) + 16); //Set the currently executing vector
     interruptDispatcher(); // manually call the interrupt handler
     ASSERT_TRUE(handlerCalled);
+    
+    
+    //Test the system with negative numbered interrupts (system interrupts)
+    bool systemHandlerCalled = false;
+    InterruptHandler systemHandler = [&systemHandlerCalled]() {
+        systemHandlerCalled = true;
+    };
+    
+    IntMan::setHandlerForInterrupt(InterruptVector::HardFault, systemHandler);
+    scb.ICSR = (static_cast<int32_t>(InterruptVector::HardFault) + 16); //Set the currently executing vector
+    interruptDispatcher(); // manually call the interrupt handler
+    ASSERT_TRUE(systemHandlerCalled);
 }
