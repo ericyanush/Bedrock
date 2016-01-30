@@ -12,14 +12,16 @@
 Bedrock::SystemControl* Bedrock::InterruptManager::scb;
 Bedrock::NVIC*  Bedrock::InterruptManager::nvic;
 
-Bedrock::InterruptHandler Bedrock::InterruptManager::handlers[MAX_VECTOR + InterruptManager::SystemVectorsOffset];
+//Bedrock::InterruptHandler Bedrock::InterruptManager::handlers[MAX_VECTOR + InterruptManager::SystemVectorsOffset];
+std::map<InterruptVector, Bedrock::InterruptHandler> Bedrock::InterruptManager::handlers;
 
 extern "C" {
     void interruptDispatcher() {
         InterruptVector activeVect = Bedrock::InterruptManager::scb->getActiveVector();
-        int32_t vecNum = static_cast<int32_t>(activeVect) + Bedrock::InterruptManager::SystemVectorsOffset; //Need to add 14 to account for system vectors
-        if (Bedrock::InterruptManager::handlers[vecNum]) {
-            Bedrock::InterruptManager::handlers[vecNum]();
+
+        auto target = Bedrock::InterruptManager::handlers.find(activeVect);
+        if (target != Bedrock::InterruptManager::handlers.end()) {
+            target->second();
         }
     }
 }
@@ -29,7 +31,7 @@ void Bedrock::InterruptManager::init(SystemControlProvider sysCtl, NVICProvider 
     nvic = &intController();
 }
 void Bedrock::InterruptManager::setHandlerForInterrupt(InterruptVector vector, InterruptHandler handler) {
-    handlers[static_cast<uint32_t>(vector) + SystemVectorsOffset] = handler;
+    handlers.emplace(vector, handler);
 }
 void Bedrock::InterruptManager::enableInterrupt(InterruptVector vector) {
     nvic->enableIrq(vector);
