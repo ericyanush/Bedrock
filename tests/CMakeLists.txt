@@ -10,15 +10,19 @@ set(BEDROCK_TEST_SRCS src/main.cpp
                       src/RCCTests.cpp
                       src/GPIOTests.cpp
                       src/FlashTests.cpp
+                      src/bxCANTestHelpers.cpp
                       src/bxCANTests.cpp
                       src/SystemControlTests.cpp
                       src/NVICTests.cpp
                       src/SysTickTests.cpp
                       src/InterruptManagerTests.cpp
-                      src/SysConfigTests.cpp)
+                      src/SysConfigTests.cpp
+                      src/GPTimerTests.cpp)
 
 set(BEDROCK_SRCS ../src/InterruptManager.cpp)
 
+#Include test class headers
+include_directories(include)
 #Include the bedrock headers
 include_directories(../include)
 #Include the googletests/mock paths

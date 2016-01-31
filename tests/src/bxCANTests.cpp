@@ -8,6 +8,7 @@
 
 #include "gtest/gtest.h"
 #include "bxCAN.hpp"
+#include "bxCANTestHelpers.hpp"
 
 //Includes for async tests
 #include <thread>
@@ -150,22 +151,10 @@ TEST_F(CANTests, TestInit_defaults) {
     using BusFrequency = bxCAN::CANPort::BusFrequency;
     using Mode = bxCAN::CANPort::Mode;
     
-    auto asyncHW = [this]() {
-        //Wait for an init mode request
-        while ((can.MCR & 0x1) != 0x1) {
-            std::this_thread::sleep_for(100us);
-        }
-        can.MSR |= 0x1; // set the INAK bit
-        //Wait for request to leave init mode
-        while ((can.MCR & 0x1) == 0x1) {
-            std::this_thread::sleep_for(100us);
-        }
-        can.MSR &= ~(0x1);
-    };
-    std::thread async(asyncHW);
+    auto asyncHW = simulateCAN_enter_exit_init(can);
     
     can.init();
-    async.join();
+    asyncHW.join();
     
     ASSERT_FALSE((can.MSR & 0x1) == 0x1); //Ensure we are not still in init mode
     ASSERT_FALSE((can.MCR & 0x1) == 0x1);
@@ -186,22 +175,10 @@ TEST_F(CANTests, TestInit) {
     
     can.MCR |= 0x2; //Set the sleep bit, as this is done automatically by hw on reset
     
-    auto asyncHW = [this]() {
-        //Wait for an init mode request
-        while ((can.MCR & 0x1) != 0x1) {
-            std::this_thread::sleep_for(100us);
-        }
-        can.MSR |= 0x1; // set the INAK bit
-        //Wait for request to leave init mode
-        while ((can.MCR & 0x1) == 0x1) {
-            std::this_thread::sleep_for(100us);
-        }
-        can.MSR &= ~(0x1);
-    };
-    std::thread async(asyncHW);
+    auto asyncHW = simulateCAN_enter_exit_init(can);
     
     can.init(BusFrequency::MHz_1, Mode::SelfTest);
-    async.join();
+    asyncHW.join();
     
     ASSERT_FALSE((can.MSR & 0x1) == 0x1); //Ensure we are not still in init mode
     ASSERT_FALSE((can.MCR & 0x1) == 0x1);
@@ -230,23 +207,10 @@ TEST_F(CANTests, TestSetMode) {
     using BusFrequency = bxCAN::CANPort::BusFrequency;
     using Mode = bxCAN::CANPort::Mode;
     
-    auto asyncHW = [this]() {
-        //wait for an init request
-        while ((can.MCR & 0x1) != 0x1) {
-            std::this_thread::sleep_for(100us);
-        }
-        can.MSR |= 0x1; // Set the INAK bit
-        //wait for request to leave init mode
-        while ((can.MCR & 0x1) == 0x1) {
-            std::this_thread::sleep_for(100us);
-        }
-        can.MSR &= ~(0x1); // Clear the INAK bit
-    };
-    
-    std::thread async(asyncHW);
+    auto asyncHW = simulateCAN_enter_exit_init(can);
     
     can.setMode(Mode::Silent);
-    async.join();
+    asyncHW.join();
     
     ASSERT_EQ(Mode::Silent, static_cast<Mode>((can.BTR & 0xC0000000) >> 30));
     ASSERT_FALSE((can.MSR & 0x1) == 0x1); //Ensure we are not still in init mode
@@ -267,23 +231,11 @@ TEST_F(CANTests, TestSetFrequency) {
     using namespace std::literals;
     using BusFrequency = bxCAN::CANPort::BusFrequency;
     using Mode = bxCAN::CANPort::Mode;
-    
-    auto asyncHW = [this]() {
-        //Wait for an init mode request
-        while ((can.MCR & 0x1) != 0x1) {
-            std::this_thread::sleep_for(100us);
-        }
-        can.MSR |= 0x1; //Set the INAK bit
-        //Wait for an exit init mode request
-        while ((can.MCR & 0x1) == 0x1) {
-            std::this_thread::sleep_for(100us);
-        }
-        can.MSR &= ~(0x1);
-    };
-    std::thread async(asyncHW);
+  
+    auto asyncHW = simulateCAN_enter_exit_init(can);
     
     can.setFrequency(BusFrequency::KHz_20);
-    async.join();
+    asyncHW.join();
     
     ASSERT_FALSE((can.MSR & 0x1) == 0x1); //Ensure we aren't still in init mode
     ASSERT_FALSE((can.MCR & 0x1) == 0x1);
