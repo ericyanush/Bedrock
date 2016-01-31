@@ -301,6 +301,16 @@ namespace Bedrock {
             }
             
             /**
+             Retrieve the currently configured operation mode
+             
+             - returns: Mode
+            */
+            Mode getMode() {
+                constexpr uint8_t modeBitShift = 30;
+                return static_cast<Mode>((BTR >> modeBitShift) & 0b11);
+            }
+            
+            /**
              Collection of supported bus frequencies
              */
             enum class BusFrequency : uint16_t {
@@ -343,6 +353,15 @@ namespace Bedrock {
             void setFrequency_unsafe(const BusFrequency freq) {
                 BTR &= ~(0x1FF); //Clear the prescaler value ls 9-bits
                 BTR |= static_cast<uint32_t>(freq);
+            }
+            
+            /**
+             Method to retrieve the current bus frequency
+             
+             - returns: BusFrequency currently configured
+            */
+            BusFrequency getFrequency() {
+                return static_cast<BusFrequency>(BTR & 0x1FF);
             }
             
             /**

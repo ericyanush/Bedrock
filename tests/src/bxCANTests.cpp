@@ -217,6 +217,13 @@ TEST_F(CANTests, TestSetMode) {
     ASSERT_FALSE((can.MCR & 0x1) == 0x1);
 }
 
+TEST_F(CANTests, TestGetMode) {
+    using Mode = bxCAN::CANPort::Mode;
+    can.setMode_unsafe(Mode::Loopback);
+    
+    ASSERT_EQ(Mode::Loopback, can.getMode());
+}
+
 TEST_F(CANTests, TestSetFrequency_unsafe) {
     using BusFrequency = bxCAN::CANPort::BusFrequency;
     using Mode = bxCAN::CANPort::Mode;
@@ -240,6 +247,14 @@ TEST_F(CANTests, TestSetFrequency) {
     ASSERT_FALSE((can.MSR & 0x1) == 0x1); //Ensure we aren't still in init mode
     ASSERT_FALSE((can.MCR & 0x1) == 0x1);
     ASSERT_EQ(BusFrequency::KHz_20, static_cast<BusFrequency>(can.BTR & 0x1FF));
+}
+
+TEST_F(CANTests, TestGetFrequency) {
+    using BusFrequency = bxCAN::CANPort::BusFrequency;
+    
+    can.setFrequency_unsafe(BusFrequency::KHz_50);
+    
+    ASSERT_EQ(BusFrequency::KHz_50, can.getFrequency());
 }
 
 TEST_F(CANTests, TestAvailableTXMailbox) {
