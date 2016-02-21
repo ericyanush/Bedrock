@@ -16,12 +16,12 @@ namespace Bedrock {
     public:
         
         enum class Type : uint8_t {
-            Data,
-            Remote
+            Data = 0,
+            Remote = 1
         };
         enum class Format : uint8_t {
-            Standard,
-            Extended
+            Standard = 0,
+            Extended = 1
         };
         
         uint32_t id;
