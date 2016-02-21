@@ -25,7 +25,6 @@ namespace Bedrock {
         };
         
         uint32_t id;
-        uint32_t timeStamp;
         uint8_t data[8];
         uint8_t dataLen;
         Type type;
