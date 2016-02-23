@@ -62,7 +62,7 @@ namespace Bedrock {
     };
     
     template <typename width_t>
-    using GPTimerProvider = GPTimer<width_t>(*)(void);
+    using GPTimerProvider = GPTimer<width_t>& (*)(void);
 }
 
 #endif /* GPTimer_h */
