@@ -34,7 +34,15 @@ namespace Bedrock {
         void disable() {
             CR1 &= ~(0x1);
         }
-        
+
+        void enableUpdateInterrupt() {
+            DIER |= (ENABLE << 0);
+        }
+
+        void disableUpdateInterrupt() {
+            DIER &= ~(ENABLE << 0);
+        }
+
         void ackUpdate() {
             SR &= ~(1 << 0);
         }

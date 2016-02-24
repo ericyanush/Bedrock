@@ -98,3 +98,17 @@ TEST_F(GPTimerTests, TestAckTrigger) {
     tim.ackTrigger();
     ASSERT_EQ(0, tim.SR);
 }
+
+TEST_F(GPTimerTests, TestEnableUpdateInterrupt) {
+    tim.enableUpdateInterrupt();
+    ASSERT_EQ(0x1, tim.DIER & 0x1);
+    tim.DIER &= ~(0x1);
+    ASSERT_TRUE(timIsInInitState());
+}
+
+TEST_F(GPTimerTests, TestDisableUpdateInterrupt) {
+    tim.enableUpdateInterrupt();
+    tim.disableUpdateInterrupt();
+    ASSERT_EQ(0, tim.DIER);
+    ASSERT_TRUE(timIsInInitState());
+}
