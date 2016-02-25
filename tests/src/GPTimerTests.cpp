@@ -61,11 +61,21 @@ TEST_F(GPTimerTests, TestSetPrescaler) {
     ASSERT_TRUE(timIsInInitState());
 }
 
+TEST_F(GPTimerTests, TestGetPrescaler) {
+    tim.setPrescaler(0xF1EF);
+    ASSERT_EQ(0xF1EF, tim.getPrescaler());
+}
+
 TEST_F(GPTimerTests, TestSetReloadValue) {
     tim.setReload(0xFEEDBEEF);
     ASSERT_EQ(0xFEEDBEEF, tim.ARR);
     tim.ARR = 0;
     ASSERT_TRUE(timIsInInitState());
+}
+
+TEST_F(GPTimerTests, TestGetReloadValue) {
+    tim.setReload(0xABCDDDEE);
+    ASSERT_EQ(0xABCDDDEE, tim.getReload());
 }
 
 TEST_F(GPTimerTests, TestGetCount) {
@@ -111,4 +121,18 @@ TEST_F(GPTimerTests, TestDisableUpdateInterrupt) {
     tim.disableUpdateInterrupt();
     ASSERT_EQ(0, tim.DIER);
     ASSERT_TRUE(timIsInInitState());
+}
+
+TEST_F(GPTimerTests, TestCheckIfUpdateInterruptEnabled) {
+    tim.disableUpdateInterrupt();
+    ASSERT_FALSE(tim.isUpdateInterruptEnabled());
+    tim.enableUpdateInterrupt();
+    ASSERT_TRUE(tim.isUpdateInterruptEnabled());
+}
+
+TEST_F(GPTimerTests, TestCheckIfUpdateInterruptPending) {
+    tim.SR = 0;
+    ASSERT_FALSE(tim.isUpdateInterruptPending());
+    tim.SR |= 0x1;
+    ASSERT_TRUE(tim.isUpdateInterruptPending());
 }

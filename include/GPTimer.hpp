@@ -19,8 +19,17 @@ namespace Bedrock {
         void setPrescaler(uint16_t prescaler) {
             PSC = prescaler;
         }
+
+        uint16_t getPrescaler() {
+            return PSC;
+        }
+
         void setReload(width_t reloadVal) {
             ARR = reloadVal;
+        }
+
+        width_t getReload() {
+            return ARR;
         }
         
         width_t getCount() {
@@ -35,12 +44,24 @@ namespace Bedrock {
             CR1 &= ~(0x1);
         }
 
+        bool isEnabled() {
+            return (CR1 & ENABLE) == ENABLE;
+        }
+
         void enableUpdateInterrupt() {
             DIER |= (ENABLE << 0);
         }
 
         void disableUpdateInterrupt() {
             DIER &= ~(ENABLE << 0);
+        }
+
+        bool isUpdateInterruptEnabled() {
+            return (DIER & ENABLE) == ENABLE;
+        }
+
+        bool isUpdateInterruptPending() {
+            return (SR & 0x1) == 0x1;
         }
 
         void ackUpdate() {
