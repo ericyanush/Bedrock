@@ -66,6 +66,14 @@ TEST_F(NVICTests, TestDisableIrq) {
     ASSERT_EQ(true, nvicIsInInitState());
 }
 
+TEST_F(NVICTests, TestIrqIsEnabled) {
+    nvic.disableIrq(InterruptVector::SixyThree);
+    ASSERT_FALSE(nvic.isIrqEnabled(InterruptVector::SixyThree));
+
+    nvic.enableIrq(InterruptVector::SixyThree);
+    ASSERT_TRUE(nvic.isIrqEnabled(InterruptVector::SixyThree));
+}
+
 TEST_F(NVICTests, TestSetPriority) {
     nvic.setIrqPriority(InterruptVector::ThirtyOne, 12);
     constexpr uint32_t intNum = static_cast<uint32_t>(InterruptVector::ThirtyOne);

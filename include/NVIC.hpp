@@ -40,6 +40,14 @@ namespace Bedrock {
             //   have no effect
             ICER[regIndex] = ENABLE << bitIndex; // This register is rc_w1, so we are "Enabling the Disable"
         }
+
+        bool isIrqEnabled(InterruptVector interrupt) {
+            const uint32_t intNum = static_cast<uint32_t>(interrupt);
+            const uint32_t regIndex = intNum / 32;
+            const uint32_t bitIndex = intNum % 32;
+
+            return (ISER[regIndex] & (ENABLE << bitIndex)) == (ENABLE << bitIndex);
+        }
         
         void setIrqPriority(InterruptVector interrupt, uint8_t priority) {
             const uint32_t intNum = static_cast<uint32_t>(interrupt);

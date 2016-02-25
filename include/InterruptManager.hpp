@@ -28,6 +28,7 @@ namespace Bedrock {
         static void setHandlerForInterrupt(InterruptVector vector, InterruptHandler handler);
         static void enableInterrupt(InterruptVector vector);
         static void disableInterrupt(InterruptVector vector);
+        static bool isInterruptEnabled(InterruptVector vector);
         static void setPriorityForInterrupt(InterruptVector vector, uint8_t priority);
         
     private:
