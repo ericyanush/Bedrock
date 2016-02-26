@@ -13,7 +13,7 @@
 #include "SystemControl.hpp"
 #include "Interrupts.hpp"
 #include <functional>
-#include <map>
+#include <array>
 
 extern "C" {
     void interruptDispatcher();
@@ -24,18 +24,29 @@ namespace Bedrock {
     
     class InterruptManager {
     public:
-        static void init(SystemControlProvider sysCtl, NVICProvider nvic);
-        static void setHandlerForInterrupt(InterruptVector vector, InterruptHandler handler);
-        static void enableInterrupt(InterruptVector vector);
-        static void disableInterrupt(InterruptVector vector);
-        static bool isInterruptEnabled(InterruptVector vector);
-        static void setPriorityForInterrupt(InterruptVector vector, uint8_t priority);
-        
+        void init(SystemControlProvider sysCtl, NVICProvider nvic);
+        void setHandlerForInterrupt(InterruptVector vector, InterruptHandler handler);
+        InterruptHandler getHandlerForInterrupt(InterruptVector vector);
+        void enableInterrupt(InterruptVector vector);
+        void disableInterrupt(InterruptVector vector);
+        bool isInterruptEnabled(InterruptVector vector);
+        void setPriorityForInterrupt(InterruptVector vector, uint8_t priority);
+        static InterruptManager& instance();
     private:
-        static SystemControl* scb;
-        static NVIC* nvic;
-        static std::map<InterruptVector, InterruptHandler> handlers;
+        SystemControl* scb;
+        NVIC* nvic;
+
+        struct HandlerLink {
+            InterruptHandler handler;
+            InterruptVector vector;
+        };
+
+        static constexpr uint16_t SystemVectorCount = 16;
+        std::array<InterruptHandler, MAX_VECTOR + SystemVectorCount> handlers;
+
         friend void ::interruptDispatcher();
+
+        static InterruptManager privateInstance;
     };
 
 }

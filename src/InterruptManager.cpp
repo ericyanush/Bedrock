@@ -9,19 +9,17 @@
 #include "InterruptManager.hpp"
 #include "Interrupts.hpp"
 
-Bedrock::SystemControl* Bedrock::InterruptManager::scb;
-Bedrock::NVIC*  Bedrock::InterruptManager::nvic;
-
-//Bedrock::InterruptHandler Bedrock::InterruptManager::handlers[MAX_VECTOR + InterruptManager::SystemVectorsOffset];
-std::map<InterruptVector, Bedrock::InterruptHandler> Bedrock::InterruptManager::handlers;
+Bedrock::InterruptManager Bedrock::InterruptManager::privateInstance;
 
 extern "C" {
     void interruptDispatcher() {
-        InterruptVector activeVect = Bedrock::InterruptManager::scb->getActiveVector();
+        using IntMan = Bedrock::InterruptManager;
+        IntMan& manager = IntMan::instance();
+        InterruptVector activeVect = manager.scb->getActiveVector();
+        uint16_t vecIdx = static_cast<uint16_t>(activeVect) + manager.SystemVectorCount;
 
-        auto target = Bedrock::InterruptManager::handlers.find(activeVect);
-        if (target != Bedrock::InterruptManager::handlers.end()) {
-            target->second();
+        if (manager.handlers[vecIdx] != nullptr) {
+            manager.handlers[vecIdx]();
         }
     }
 }
@@ -31,8 +29,15 @@ void Bedrock::InterruptManager::init(SystemControlProvider sysCtl, NVICProvider 
     nvic = &intController();
 }
 void Bedrock::InterruptManager::setHandlerForInterrupt(InterruptVector vector, InterruptHandler handler) {
-    handlers.emplace(vector, handler);
+    uint16_t vecPos = static_cast<uint16_t>(vector) + SystemVectorCount;
+    handlers[vecPos] = handler;
 }
+
+Bedrock::InterruptHandler Bedrock::InterruptManager::getHandlerForInterrupt(InterruptVector vector) {
+    uint16_t vecPos = static_cast<uint16_t>(vector) + SystemVectorCount;
+    return handlers[vecPos];
+}
+
 void Bedrock::InterruptManager::enableInterrupt(InterruptVector vector) {
     nvic->enableIrq(vector);
 }
@@ -41,4 +46,8 @@ void Bedrock::InterruptManager::disableInterrupt(InterruptVector vector) {
 }
 void Bedrock::InterruptManager::setPriorityForInterrupt(InterruptVector vector, uint8_t priority) {
     nvic->setIrqPriority(vector, (uint8_t)(priority << 4)); // The processor only uses the upper 4 bits of the byte
+}
+
+Bedrock::InterruptManager& Bedrock::InterruptManager::instance() {
+    return privateInstance;
 }
