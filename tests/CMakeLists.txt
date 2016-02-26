@@ -17,9 +17,11 @@ set(BEDROCK_TEST_SRCS src/main.cpp
                       src/SysTickTests.cpp
                       src/InterruptManagerTests.cpp
                       src/SysConfigTests.cpp
-                      src/GPTimerTests.cpp)
+                      src/GPTimerTests.cpp
+                      src/DelayTests.cpp)
 
-set(BEDROCK_SRCS ../src/InterruptManager.cpp)
+set(BEDROCK_SRCS ../src/InterruptManager.cpp
+                 ../src/Delay.cpp)
 
 #Include test class headers
 include_directories(include)

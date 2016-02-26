@@ -55,6 +55,7 @@ namespace Bedrock {
         dev_reg32_t VAL;
         dev_reg32_t CALIB;
     };
+    using SysTickProvider = SysTick& (*)(void);
 }
 
 #endif /* SysTick_h */
