@@ -29,7 +29,9 @@ namespace Bedrock {
         uint8_t dataLen;
         Type type;
         Format format;
-        
+
+        CANMessage(uint32_t id, Type type, Format format, uint8_t dataLength) :
+                   id(id), type(type), format(format), dataLen(dataLength) { };
     };
 }
 
