@@ -39,8 +39,8 @@ namespace Bedrock {
         }
 
         static void ms(uint32_t millis) {
-            uint32_t target = msCount + millis;
-            while(msCount < target);
+            uint32_t start = msCount;
+            while((msCount - start) < millis);
         }
     private:
         static volatile uint32_t msCount;
