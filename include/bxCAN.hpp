@@ -13,6 +13,7 @@
 #include "types.hpp"
 #include "CANMessage.hpp"
 #include "RCC.hpp"
+#include "Delay.hpp"
 
 namespace Bedrock {
     namespace bxCAN {
@@ -236,27 +237,36 @@ namespace Bedrock {
             /**
              Method to put CAN peripheral in initialization mode
              
-             Note: This method will BLOCK until the hardware has signaled that it hase
+             Note: This method will BLOCK until the hardware has signaled that it has
              successfully entered init mode. (INAK bit in MSR is 1)
              */
             void enterInitMode() {
                 //Write 1 to INRQ (Init Mode Request)
                 MCR |= (ENABLE << 0);
                 //Wait until the init mode flag has been set by hw
-                while ((MSR & 0x1) != 0x1) {}
+                while ((MSR & 0x1) != 0x1) { }
             }
             
             /**
              Method to put CAN peripheral into operational mode
              
-             Note: This method will BLOCK until the hardware has signaled that it hase
-             successfully left init mode. (INAK bit in MSR is cleared)
+             - parameter timeout: the number of milliseconds to wait for the bus to sync before giving up
+             - returns bool: true if exit was successful, false if timeout was reached
+             
+             Note: This method will BLOCK until the hardware has signaled that it has
+             successfully left init mode, or the timeout value was reached. (INAK bit in MSR is cleared)
              */
-            void exitInitMode() {
+            bool exitInitMode(uint16_t timeout = UINT16_MAX) {
                 //Clear Init Mode Request
                 MCR &= ~(ENABLE << 0);
                 //Wait until the init mode flag has been cleared by hw
-                while ((MSR & 0x1) == 0x1) {}
+                uint32_t start = Delay::getMillis();
+                while ((MSR & 0x1) == 0x1) {
+                    if ((Delay::getMillis() - start) > timeout) {
+                        return false;
+                    }
+                }
+                return true;
             }
             
             /**
@@ -329,16 +339,16 @@ namespace Bedrock {
              Method to change the bus operation frequency.
              
              - parameter freq: The bus operation frequency to switch to.
-             
+             - returns bool: true if the frequency was sucessfully changed, false if a timeout occurred
              Note: This method is safe to call; it automatically handles the
              entrance to and exit from init mode.
              
              Note: this method is currently hardcoded to use an AHB1 clock of 36MHz
              */
-            void setFrequency(const BusFrequency freq) {
+            bool setFrequency(const BusFrequency freq, uint16_t timeoutMS = UINT16_MAX) {
                 enterInitMode();
                 setFrequency_unsafe(freq);
-                exitInitMode();
+                return exitInitMode(timeoutMS);
             }
             
             /**

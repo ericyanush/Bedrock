@@ -53,7 +53,16 @@ protected:
     bxCAN::CANPort can{0};
     bxCAN::CANPort untouched{0};
     CANMessage testMessage;
+    
+    //Objects needed for testing timeouts
+    static SysTick tick;
+    static SysTick& fakeTick() {
+        return tick;
+    }
 };
+
+//instantiate static test class memebers
+Bedrock::SysTick CANTests::tick{0};
 
 /** Ensure layout of bxCAN object adheres with Register Map
  * as defined in the STM32F3 Programming Manual
@@ -247,6 +256,40 @@ TEST_F(CANTests, TestSetFrequency) {
     ASSERT_FALSE((can.MSR & 0x1) == 0x1); //Ensure we aren't still in init mode
     ASSERT_FALSE((can.MCR & 0x1) == 0x1);
     ASSERT_EQ(BusFrequency::KHz_20, static_cast<BusFrequency>(can.BTR & 0x1FF));
+}
+
+TEST_F(CANTests, TestSetFrequencyTimeout) {
+    using BusFrequency = bxCAN::CANPort::BusFrequency;
+    using Mode = bxCAN::CANPort::Mode;
+    
+    //Set the init mode bit preemptively
+    // This signals to the HW that we are in init mode
+    // Re-entering init mode while in init mode has no effect
+    can.MSR |= 0x1;
+    
+    //Get the handler for delay functions
+    Delay::init<1000000, fakeTick>();
+    auto tickUp = InterruptManager::instance().getHandlerForInterrupt(InterruptVector::SysTick);
+    std::atomic_bool done;
+    done.store(false);
+    
+    auto asyncHW = [&tickUp, &done]() {
+        while (!done.load()) {
+            tickUp();
+        }
+    };
+    std::thread async(asyncHW);
+    
+    uint32_t startMS = Delay::getMillis();
+    can.setFrequency(BusFrequency::KHz_50, 25);
+    uint32_t endMS = Delay::getMillis();
+    
+    done.store(true);
+    
+    async.join(); //wait for thread to die
+    
+    ASSERT_GE(endMS - startMS, 25);
+    ASSERT_LE(25 * 1.10, endMS - startMS); //Allow for 10% error in test
 }
 
 TEST_F(CANTests, TestGetFrequency) {
