@@ -75,6 +75,26 @@ TEST_F(GPIOTest, TestAlternateFunctinonTypes) {
 }
 
 class GPIOPinTest : public ::testing::Test {
+public:
+    
+    GPIOPinTest() :
+                zero(fakePort, 0),
+                one(fakePort, 1),
+                two(fakePort, 2),
+                three(fakePort, 3),
+                four(fakePort, 4),
+                five(fakePort, 5),
+                six(fakePort, 6),
+                seven(fakePort, 7),
+                eight(fakePort, 8),
+                nine(fakePort, 9),
+                ten(fakePort, 10),
+                eleven(fakePort, 11),
+                twelve(fakePort, 12),
+                thirteen(fakePort, 13),
+                fourteen(fakePort, 14),
+                fifteen(fakePort, 15)
+    {  }
     
 protected:
     virtual void SetUp() {
@@ -88,22 +108,22 @@ protected:
         return testPort;
     }
     
-    GPIO::GPIOPin<fakePort, 0> zero;
-    GPIO::GPIOPin<fakePort, 1> one;
-    GPIO::GPIOPin<fakePort, 2> two;
-    GPIO::GPIOPin<fakePort, 3> three;
-    GPIO::GPIOPin<fakePort, 4> four;
-    GPIO::GPIOPin<fakePort, 5> five;
-    GPIO::GPIOPin<fakePort, 6> six;
-    GPIO::GPIOPin<fakePort, 7> seven;
-    GPIO::GPIOPin<fakePort, 8> eight;
-    GPIO::GPIOPin<fakePort, 9> nine;
-    GPIO::GPIOPin<fakePort, 10> ten;
-    GPIO::GPIOPin<fakePort, 11> eleven;
-    GPIO::GPIOPin<fakePort, 12> twelve;
-    GPIO::GPIOPin<fakePort, 13> thirteen;
-    GPIO::GPIOPin<fakePort, 14> fourteen;
-    GPIO::GPIOPin<fakePort, 15> fifteen;
+    GPIO::GPIOPin zero;
+    GPIO::GPIOPin one;
+    GPIO::GPIOPin two;
+    GPIO::GPIOPin three;
+    GPIO::GPIOPin four;
+    GPIO::GPIOPin five;
+    GPIO::GPIOPin six;
+    GPIO::GPIOPin seven;
+    GPIO::GPIOPin eight;
+    GPIO::GPIOPin nine;
+    GPIO::GPIOPin ten;
+    GPIO::GPIOPin eleven;
+    GPIO::GPIOPin twelve;
+    GPIO::GPIOPin thirteen;
+    GPIO::GPIOPin fourteen;
+    GPIO::GPIOPin fifteen;
 };
  GPIO::GPIOPort GPIOPinTest::testPort;
 

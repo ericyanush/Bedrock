@@ -72,53 +72,57 @@ namespace Bedrock {
          */
         using GPIOPortProvider = GPIOPort& (*)(void);
         
-        template <GPIOPortProvider port, uint8_t pin>
         class GPIOPin {
         private:
-            static_assert(pin >= 0 && pin <= 15, "Pin Number out of range!");
+            uint8_t pin;
+            GPIOPortProvider port;
+            
         public:
             
-            static void setAlternateFunction(AlternateFunction af) {
+            GPIOPin(GPIOPortProvider port, uint8_t pin) :
+                    port(port), pin(pin) {  }
+            
+            void setAlternateFunction(AlternateFunction af) {
                 //Setup the pin's alternate function
                 dev_reg32_t& afReg = (pin > 7) ? port().AFH : port().AFL;
-                constexpr uint8_t regShift = (pin % 8) * 4;
+                const uint8_t regShift = (pin % 8) * 4;
                 afReg &= ~(static_cast<uint32_t>(AlternateFunction::AF15) << regShift); // clear the current AF
                 afReg |= static_cast<uint32_t>(af) << regShift;
             }
             
-            static void setMode(PinMode mode) {
-                constexpr uint32_t modeShift = pin * 2;
+            void setMode(PinMode mode) {
+                const uint32_t modeShift = pin * 2;
                 
                 //clear the current config
                 port().MODE &= ~(0b11 << modeShift);
                 port().MODE |= (static_cast<uint32_t>(mode) << modeShift);
             }
-            static void setOutSpeed(OutputSpeed speed) {
-                constexpr uint32_t speedShift = pin * 2;
+            void setOutSpeed(OutputSpeed speed) {
+                const uint32_t speedShift = pin * 2;
                 port().OSPEED &= ~(0b11 << speedShift);
                 port().OSPEED |= static_cast<uint32_t>(speed) << speedShift;
             }
-            static void setOutputType(OutputType type) {
+            void setOutputType(OutputType type) {
                 port().OTYPE &= ~(1 << pin);
                 port().OTYPE |= static_cast<uint32_t>(type) << pin;
             }
-            static void setPullType(IOPullType type) {
-                constexpr uint32_t pullShift = pin * 2;
+            void setPullType(IOPullType type) {
+                const uint32_t pullShift = pin * 2;
                 port().PUPD &= ~(0b11 << pullShift);
                 port().PUPD |= static_cast<uint32_t>(type) << pullShift;
             }
             
-            static bool isOn() {
+            bool isOn() {
                 return (port().ODR >> pin) & 0x1;
             }
             
-            static void on() {
+            void on() {
                 port().ODR |= (1 << pin);
             }
-            static void off() {
+            void off() {
                 port().ODR &= ~(1 << pin);
             }
-            static void toggle() {
+            void toggle() {
                 port().ODR ^= (1 << pin);
             }
         };
