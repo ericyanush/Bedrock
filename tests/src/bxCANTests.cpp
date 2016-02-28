@@ -683,6 +683,15 @@ TEST_F(CANTests, TestDisableFilter) {
     }
 }
 
+TEST_F(CANTests, TestFilterIsEnabled) {
+    for (uint8_t i = 0; i < 14; i++) {
+        can.filters.disableFilterBank(i);
+        ASSERT_FALSE(can.filters.isFilterBankEnabled(i));
+        can.filters.enableFilterBank(i);
+        ASSERT_TRUE(can.filters.isFilterBankEnabled(i));
+    }
+}
+
 TEST_F(CANTests, TestAssignFilterToFIFO) {
     //note: we cannot test for FINIT bit being set (required by hw)!
     for (uint8_t i = 0; i < 14; i++) {
@@ -819,5 +828,28 @@ TEST_F(CANTests, TestConfigureDualIDListFilter) {
         ASSERT_TRUE((can.filters.FM1R & (1 << i)) == (1 << i)); // Ensure we are in ID mode
         ASSERT_TRUE((can.filters.FS1R & (1 << i)) == 0); //Ensure we are in Dual scale
         ASSERT_EQ(0, can.filters.FMR); //Ensure the FINIT bit is cleared
+    }
+}
+
+TEST_F(CANTests, TestGetFilterConfig) {
+    using Filters = bxCAN::Filters;
+    Filters::SingleIDFilter_t id{0};
+    Filters::SingleMaskFilter_t mask{0};
+    Filters::DualIDFilter_t id_dual{0};
+    Filters::DualMaskFilter_t mask_dual{0};
+    
+    //Test all the filter banks
+    for (uint8_t i = 0; i < 14; i++) {
+        can.filters.configureSingleMaskFilter(i, id, mask);
+        ASSERT_EQ(Filters::FilterConfig::SingleMask, can.filters.getFilterConfig(i));
+        
+        can.filters.configureSingleIDListFilter(i, id, id);
+        ASSERT_EQ(Filters::FilterConfig::SingleID, can.filters.getFilterConfig(i));
+        
+        can.filters.configureDualMaskFilter(i, id_dual, mask_dual, id_dual, mask_dual);
+        ASSERT_EQ(Filters::FilterConfig::DualMask, can.filters.getFilterConfig(i));
+        
+        can.filters.configureDualIDListFilter(i, id_dual, id_dual, id_dual, id_dual);
+        ASSERT_EQ(Filters::FilterConfig::DualID, can.filters.getFilterConfig(i));
     }
 }

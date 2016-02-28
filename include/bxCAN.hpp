@@ -88,6 +88,36 @@ namespace Bedrock {
             }
             
             /**
+             Check if a filter bank is currently enabled
+             
+             - Paramter filterIndex: The index of the filter bank to check
+             - Returns bool: true if enabled, false if not
+             */
+            bool isFilterBankEnabled(uint8_t filterIndex) {
+                return (FA1R >> filterIndex) & 0x1;
+            }
+            
+            enum class FilterConfig {
+                //Bit 1 = Mode, Bit 0 = Scale
+                DualMask = 0b00,
+                SingleMask = 0b01,
+                DualID = 0b10,
+                SingleID = 0b11
+            };
+            
+            /**
+             Retrieve the current configuration for a filter bank
+             
+             - Parameter filterIndex: The index of the filter bank to check
+             - Returns FilterConfig: The configuration type of the bank
+             */
+            FilterConfig getFilterConfig(uint8_t filterIndex) {
+                uint8_t conf = (FM1R >> filterIndex) & 0x1; //extract the mode bit
+                conf = (uint8_t)(conf << 1) | ((FS1R >> filterIndex) & 0x1); // put scale into bit 0 and mode into bit 1
+                return static_cast<FilterConfig>(conf);
+            }
+            
+            /**
              Configure a filter bank in Single-Width Mask mode; A frame may match the masked filter.
              
              - Parameter filterIndex: The filter bank index to configure
