@@ -782,6 +782,13 @@ namespace Bedrock {
                 return (ESR & 0x2) == 0x2;
             }
             
+            /**
+             Clear the pending Error Interrupt
+             */
+            void ackErrorInterrupt() {
+                MSR &= ~(0x1 << 2);
+            }
+            
             dev_reg32_t MCR;
             dev_reg32_t MSR;
             dev_reg32_t TSR;

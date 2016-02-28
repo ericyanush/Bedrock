@@ -598,6 +598,12 @@ TEST_F(CANTests, TestIsInErrorPassiveState) {
     ASSERT_TRUE(can.isInErrorPassiveState());
 }
 
+TEST_F(CANTests, TestAckErrorInterrupt) {
+    can.MSR |= ENABLE << 2;
+    can.ackErrorInterrupt();
+    ASSERT_EQ(0, (can.MSR >> 2) & 0x1);
+}
+
 TEST_F(CANTests, TestFilterStructs) {
     //Test the single id struct
     ASSERT_EQ(4, sizeof(bxCAN::Filters::SingleIDFilter_t));
