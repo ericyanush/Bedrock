@@ -232,6 +232,8 @@ TEST_F(CANTests, TestSetFrequency) {
 }
 
 TEST_F(CANTests, TestSetFrequencyTimeout) {
+    using namespace std::chrono_literals;
+    
     using BusFrequency = bxCAN::CANPort::BusFrequency;
     using Mode = bxCAN::CANPort::Mode;
     
@@ -249,6 +251,7 @@ TEST_F(CANTests, TestSetFrequencyTimeout) {
     auto asyncHW = [&tickUp, &done]() {
         while (!done.load()) {
             tickUp();
+            std::this_thread::sleep_for(1ms);
         }
     };
     std::thread async(asyncHW);
@@ -262,7 +265,7 @@ TEST_F(CANTests, TestSetFrequencyTimeout) {
     async.join(); //wait for thread to die
     
     ASSERT_GE(endMS - startMS, 25);
-    ASSERT_LE(25 * 1.10, endMS - startMS); //Allow for 10% error in test
+    ASSERT_LE(endMS - startMS, 25 * 1.10); //Allow for 10% error in test
 }
 
 TEST_F(CANTests, TestGetFrequency) {
