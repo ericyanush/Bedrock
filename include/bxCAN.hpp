@@ -377,10 +377,10 @@ namespace Bedrock {
             /**
              Method to setup the CAN peripheral
              
-             - Parameter freq: Bus operational frequency to use
-             - Parameter opMode: The operational mode to place the bus into
+             Note: This doesn't configure a bus frequency or mode, it just configures
+                     the peripheral for future use
              */
-            void init(const BusFrequency freq = BusFrequency::KHz_125, const Mode opMode = Mode::Normal) {
+            void init() {
                 enterInitMode();
                 
                 constexpr uint32_t PRE_RMASK = 0x1FF;
@@ -394,17 +394,13 @@ namespace Bedrock {
                 constexpr uint32_t TS2_RMASK = 0b111 << 20;
                 constexpr uint32_t SJW = (1 - 1) << 24;
                 constexpr uint32_t SJW_RMASK = 0b11 << 24;
-                
-                uint32_t pre_val = static_cast<uint32_t>(freq);
-                uint32_t mod_val = static_cast<uint32_t>(opMode) << 30;
+            
                 BTR &= ~(SJW_RMASK | TS2_RMASK | TS1_RMASK | PRE_RMASK | MODE_RMASK); // clear current vals
-                BTR |= (TS1 | TS2 | SJW | pre_val | mod_val); // Set the new values
+                BTR |= (TS1 | TS2 | SJW); // Set the new values
                 
                 //Enable Automatic Retransmission, Automatic Bus-off, and disable Time-triggered mode and Sleep mode
                 MCR &= ~((ENABLE << 7) | (ENABLE << 4) | (ENABLE << 1)); //Disable TTCM and NART
                 MCR |= (ENABLE << 6); // Enable ABOM
-                
-                exitInitMode();
             }
             
             /**

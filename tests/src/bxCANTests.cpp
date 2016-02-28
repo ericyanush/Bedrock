@@ -155,51 +155,24 @@ TEST_F(CANTests, TestExitInitMode) {
     ASSERT_FALSE((can.MSR & 0x1) == 0x1); // Ensure the INAK bit was cleared
 }
 
-TEST_F(CANTests, TestInit_defaults) {
-    using namespace std::literals;
-    using BusFrequency = bxCAN::CANPort::BusFrequency;
-    using Mode = bxCAN::CANPort::Mode;
-    
-    auto asyncHW = simulateCAN_enter_exit_init(can);
-    
-    can.init();
-    asyncHW.join();
-    
-    ASSERT_FALSE((can.MSR & 0x1) == 0x1); //Ensure we are not still in init mode
-    ASSERT_FALSE((can.MCR & 0x1) == 0x1);
-    ASSERT_EQ(BusFrequency::KHz_125, static_cast<BusFrequency>(can.BTR & 0x1FF)); //Ensure we have set the prescaler value properly
-    ASSERT_EQ(8, ((can.BTR & 0x000F0000) >> 16) + 1); //Ensure we have setup BS1 to have 8tq
-    ASSERT_EQ(3, ((can.BTR & 0x00700000) >> 20) + 1); //Ensure we have setup BS2 to have 3tq
-    ASSERT_EQ(1, ((can.BTR & 0x03000000) >> 24) + 1); //Ensure we have setup the Sync Jump to be 1tq
-    ASSERT_EQ(Mode::Normal, static_cast<Mode>((can.BTR & 0xC0000000) >> 30)); //Ensure we have setup normal mode
-    ASSERT_FALSE((can.MCR & 0x10) == 0x10); //Ensure we have Automatic Retransmission enabled (NART bit not set)
-    ASSERT_TRUE((can.MCR & 0x40) == 0x40); // Ensure we have Automatic Bus-off management enabled (ABOM bit set)
-    ASSERT_FALSE((can.MCR & 0x80) == 0x80); //Ensure we have Time Triggered Mode off (TTCM bit not set)
-}
-
 TEST_F(CANTests, TestInit) {
     using namespace std::literals;
     using BusFrequency = bxCAN::CANPort::BusFrequency;
     using Mode = bxCAN::CANPort::Mode;
     
-    can.MCR |= 0x2; //Set the sleep bit, as this is done automatically by hw on reset
+    auto asyncHW = simulateCAN_enter_init(can);
     
-    auto asyncHW = simulateCAN_enter_exit_init(can);
-    
-    can.init(BusFrequency::MHz_1, Mode::SelfTest);
+    can.init();
     asyncHW.join();
     
-    ASSERT_FALSE((can.MSR & 0x1) == 0x1); //Ensure we are not still in init mode
-    ASSERT_FALSE((can.MCR & 0x1) == 0x1);
-    ASSERT_EQ(BusFrequency::MHz_1, static_cast<BusFrequency>(can.BTR & 0x1FF)); //Ensure we have set the prescaler value properly
+    ASSERT_TRUE((can.MSR & 0x1) == 0x1); //Ensure we are still in init mode
+    ASSERT_TRUE((can.MCR & 0x1) == 0x1);
     ASSERT_EQ(8, ((can.BTR & 0x000F0000) >> 16) + 1); //Ensure we have setup BS1 to have 8tq
     ASSERT_EQ(3, ((can.BTR & 0x00700000) >> 20) + 1); //Ensure we have setup BS2 to have 3tq
     ASSERT_EQ(1, ((can.BTR & 0x03000000) >> 24) + 1); //Ensure we have setup the Sync Jump to be 1tq
-    ASSERT_EQ(Mode::SelfTest, static_cast<Mode>((can.BTR & 0xC0000000) >> 30)); //Ensure we have setup self-test mode
     ASSERT_FALSE((can.MCR & 0x10) == 0x10); //Ensure we have Automatic Retransmission enabled (NART bit not set)
     ASSERT_TRUE((can.MCR & 0x40) == 0x40); // Ensure we have Automatic Bus-off management enabled (ABOM bit set)
-    ASSERT_FALSE((can.MCR & 0x80) == 0x80); //Ensure we have Time Triggered Mode disabled (TTCM bit not set)
-    ASSERT_FALSE((can.MCR & 0x2) == 0x2); //Ensure we have cleared the sleep mode bit
+    ASSERT_FALSE((can.MCR & 0x80) == 0x80); //Ensure we have Time Triggered Mode off (TTCM bit not set)
 }
 
 TEST_F(CANTests, TestSetMode_unsafe) {
