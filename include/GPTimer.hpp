@@ -21,7 +21,7 @@ namespace Bedrock {
         }
 
         uint16_t getPrescaler() {
-            return PSC;
+            return (uint16_t)PSC;
         }
 
         void setReload(width_t reloadVal) {

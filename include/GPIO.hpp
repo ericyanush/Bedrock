@@ -74,8 +74,8 @@ namespace Bedrock {
         
         class GPIOPin {
         private:
-            uint8_t pin;
             GPIOPortProvider port;
+            uint8_t pin;
             
         public:
             

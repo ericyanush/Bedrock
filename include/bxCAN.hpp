@@ -375,11 +375,16 @@ namespace Bedrock {
             }
             
             /**
-             Method to setup the CAN peripheral
-             
-             Note: This doesn't configure a bus frequency or mode, it just configures
-                     the peripheral for future use
-             */
+            Method to setup the CAN peripheral
+            
+            This method performs preliminary configuration of the peripheral.
+            
+            Postcondition: The bus will be ready for application configuration
+                           (frequency, mode), and will be in init mode.
+            
+            Note: This doesn't configure a bus frequency or mode, it just configures
+                  the peripheral for future use
+            */
             void init() {
                 enterInitMode();
                 
