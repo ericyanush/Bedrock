@@ -59,6 +59,8 @@ TEST_F(DelayTests, TestGetMillis) {
 }
 
 TEST_F(DelayTests, TestDelayMS) {
+    using namespace std::literals;
+    
     Bedrock::Delay::init<1000000, fakeSysTick>();
 
     std::atomic_bool done;
@@ -68,6 +70,7 @@ TEST_F(DelayTests, TestDelayMS) {
         auto sysTickIntHandler = manager.getHandlerForInterrupt(InterruptVector::SysTick);
 
         while(1) {
+            std::this_thread::sleep_for(1ms);
             sysTickIntHandler();
             if (done.load()) {
                 return;
@@ -78,15 +81,15 @@ TEST_F(DelayTests, TestDelayMS) {
     std::thread async(asyncHW);
 
     uint32_t startMS = Bedrock::Delay::getMillis();
-    Bedrock::Delay::ms(200);
+    Bedrock::Delay::ms(15);
     uint32_t endMS = Bedrock::Delay::getMillis();
 
     done = true;
 
     async.join();
 
-    ASSERT_GE(endMS - startMS, 200); //Must be at-least 200
-    ASSERT_LT(endMS - startMS, 200 * 1.1); //Allow 10% for error in test setup
+    ASSERT_GE(endMS - startMS, 15); //Must be at-least 200
+    ASSERT_LT(endMS - startMS, 15 * 1.1); //Allow 10% for error in test setup
 }
 
 /*
