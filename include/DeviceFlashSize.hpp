@@ -11,13 +11,15 @@
 
 #include "types.hpp"
 
-class DeviceFlashSize {
-public:
-    const dev_reg16_t memSize;
-    
-    uint16_t flashKBs() {
-        return memSize;
-    }
-};
+namespace Bedrock {
+    class DeviceFlashSize {
+    public:
+        const dev_reg16_t memSize;
+        
+        uint16_t flashKBs() {
+            return memSize;
+        }
+    };
+}
 
 #endif /* DeviceFlashSize_h */
