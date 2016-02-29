@@ -46,6 +46,12 @@ namespace Bedrock {
                 rtr : 1,
                 ide : 1,
                 id  : 29;
+                
+                SingleIDFilter_t() :
+                                 rtr(0), ide(0), id(0) { }
+                
+                SingleIDFilter_t(uint32_t id, bool ide, bool rtr) :
+                                 rtr(rtr), ide(ide), id(id)  {   }
             };
             
             struct SingleMaskFilter_t {
@@ -53,6 +59,12 @@ namespace Bedrock {
                 rtr_mask : 1,
                 ide_mask : 1,
                 id_mask  : 29;
+                
+                SingleMaskFilter_t() :
+                                   rtr_mask(0), ide_mask(0), id_mask(0) {  }
+                
+                SingleMaskFilter_t(uint32_t id_mask, bool ide_mask, bool rtr_mask) :
+                                   rtr_mask(rtr_mask), ide_mask(ide_mask), id_mask(id_mask) {  }
             };
             
             struct DualIDFilter_t {
@@ -60,6 +72,12 @@ namespace Bedrock {
                 ide   : 1,
                 rtr   : 1,
                 id    : 11;
+                
+                DualIDFilter_t() :
+                               ide(0), rtr(0), id(0) {   }
+                
+                DualIDFilter_t(uint16_t id, bool ide, bool rtr) :
+                               ide(ide), rtr(rtr), id(id) {  }
             };
             
             struct DualMaskFilter_t {
@@ -67,6 +85,12 @@ namespace Bedrock {
                 ide_mask   : 1,
                 rtr_mask   : 1,
                 id_mask    : 11;
+                
+                DualMaskFilter_t() :
+                                 ide_mask(0), rtr_mask(0), id_mask(0) {  }
+                
+                DualMaskFilter_t(uint16_t id_mask, bool ide_mask, bool rtr_mask) :
+                                 ide_mask(ide_mask), rtr_mask(rtr_mask), id_mask(id_mask) {   }
             };
             
             /**

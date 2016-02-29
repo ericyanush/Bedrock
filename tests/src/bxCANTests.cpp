@@ -610,7 +610,7 @@ TEST_F(CANTests, TestAckErrorInterrupt) {
 TEST_F(CANTests, TestFilterStructs) {
     //Test the single id struct
     ASSERT_EQ(4, sizeof(bxCAN::Filters::SingleIDFilter_t));
-    bxCAN::Filters::SingleIDFilter_t singleId{0};
+    bxCAN::Filters::SingleIDFilter_t singleId;
     uint32_t& rawSingleId = *reinterpret_cast<uint32_t*>(&singleId);
     singleId.ide = 1;
     ASSERT_TRUE((rawSingleId & 0x4) == 0x4);
@@ -623,7 +623,7 @@ TEST_F(CANTests, TestFilterStructs) {
     
     //Test the single mask struct
     ASSERT_EQ(4, sizeof(bxCAN::Filters::SingleMaskFilter_t));
-    bxCAN::Filters::SingleMaskFilter_t singleMask{0};
+    bxCAN::Filters::SingleMaskFilter_t singleMask;
     uint32_t& rawSingleMask = *reinterpret_cast<uint32_t*>(&singleMask);
     singleMask.id_mask = 0x12345678;
     ASSERT_EQ(0x12345678, rawSingleMask >> 3);
@@ -636,7 +636,7 @@ TEST_F(CANTests, TestFilterStructs) {
     
     //Test the Dual ID struct
     ASSERT_EQ(2, sizeof(bxCAN::Filters::DualIDFilter_t));
-    bxCAN::Filters::DualIDFilter_t dualId{0};
+    bxCAN::Filters::DualIDFilter_t dualId;
     uint16_t& rawDualId = *reinterpret_cast<uint16_t*>(&dualId);
     dualId.id = 0x7A8;
     ASSERT_EQ(0x7A8, rawDualId >> 5);
@@ -652,7 +652,7 @@ TEST_F(CANTests, TestFilterStructs) {
     
     //Test the Dual Mask struct
     ASSERT_EQ(2, sizeof(bxCAN::Filters::DualMaskFilter_t));
-    bxCAN::Filters::DualMaskFilter_t dualMask{0};
+    bxCAN::Filters::DualMaskFilter_t dualMask;
     uint16_t& rawDualMask = *reinterpret_cast<uint16_t*>(&dualMask);
     dualMask.id_mask = 0x7A8;
     ASSERT_EQ(0x7A8, rawDualMask >> 5);
@@ -713,8 +713,8 @@ TEST_F(CANTests, TestGetAssignedFIFO) {
 
 TEST_F(CANTests, TestConfigureSingleMaskFilter) {
     using Filters = bxCAN::Filters;
-    Filters::SingleIDFilter_t id{0};
-    Filters::SingleMaskFilter_t mask{0};
+    Filters::SingleIDFilter_t id;
+    Filters::SingleMaskFilter_t mask;
     //Set some values
     id.id = 0x12345678;
     id.ide = 1;
@@ -739,8 +739,8 @@ TEST_F(CANTests, TestConfigureSingleMaskFilter) {
 
 TEST_F(CANTests, TestConfigureSingleIDListFilter) {
     using Filters = bxCAN::Filters;
-    Filters::SingleIDFilter_t id{0};
-    Filters::SingleIDFilter_t id2{0};
+    Filters::SingleIDFilter_t id;
+    Filters::SingleIDFilter_t id2;
     //Set some values
     id.id = 0x12345678;
     id.ide = 1;
@@ -765,10 +765,10 @@ TEST_F(CANTests, TestConfigureSingleIDListFilter) {
 
 TEST_F(CANTests, TestConfigureDualMaskFilter) {
     using Filters = bxCAN::Filters;
-    Filters::DualIDFilter_t id1{0};
-    Filters::DualMaskFilter_t mask1{0};
-    Filters::DualIDFilter_t id2{0};
-    Filters::DualMaskFilter_t mask2{0};
+    Filters::DualIDFilter_t id1;
+    Filters::DualMaskFilter_t mask1;
+    Filters::DualIDFilter_t id2;
+    Filters::DualMaskFilter_t mask2;
     
     //Set some values
     id1.id = 0x7AF;
@@ -803,10 +803,10 @@ TEST_F(CANTests, TestConfigureDualMaskFilter) {
 
 TEST_F(CANTests, TestConfigureDualIDListFilter) {
     using Filters = bxCAN::Filters;
-    Filters::DualIDFilter_t id1{0};
-    Filters::DualIDFilter_t id2{0};
-    Filters::DualIDFilter_t id3{0};
-    Filters::DualIDFilter_t id4{0};
+    Filters::DualIDFilter_t id1;
+    Filters::DualIDFilter_t id2;
+    Filters::DualIDFilter_t id3;
+    Filters::DualIDFilter_t id4;
     
     //Set some values
     id1.id = 0x7AF;
@@ -842,10 +842,10 @@ TEST_F(CANTests, TestConfigureDualIDListFilter) {
 
 TEST_F(CANTests, TestGetFilterConfig) {
     using Filters = bxCAN::Filters;
-    Filters::SingleIDFilter_t id{0};
-    Filters::SingleMaskFilter_t mask{0};
-    Filters::DualIDFilter_t id_dual{0};
-    Filters::DualMaskFilter_t mask_dual{0};
+    Filters::SingleIDFilter_t id;
+    Filters::SingleMaskFilter_t mask;
+    Filters::DualIDFilter_t id_dual;
+    Filters::DualMaskFilter_t mask_dual;
     
     //Test all the filter banks
     for (uint8_t i = 0; i < 14; i++) {
