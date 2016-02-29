@@ -42,29 +42,29 @@ namespace Bedrock {
              which both armv7(e)-m and x86(-64) are.
              */
             struct SingleIDFilter_t {
-                uint32_t     : 1,
+                uint32_t __a : 1, //padding
                 rtr : 1,
                 ide : 1,
                 id  : 29;
                 
                 SingleIDFilter_t() :
-                                 rtr(0), ide(0), id(0) { }
+                                 __a(0), rtr(0), ide(0), id(0) { }
                 
                 SingleIDFilter_t(uint32_t id, bool ide, bool rtr) :
-                                 rtr(rtr), ide(ide), id(id)  {   }
+                                 __a(0), rtr(rtr), ide(ide), id(id)  {   }
             };
             
             struct SingleMaskFilter_t {
-                uint32_t          : 1,
+                uint32_t   __a : 1, //padding
                 rtr_mask : 1,
                 ide_mask : 1,
                 id_mask  : 29;
                 
                 SingleMaskFilter_t() :
-                                   rtr_mask(0), ide_mask(0), id_mask(0) {  }
+                                   __a(0), rtr_mask(0), ide_mask(0), id_mask(0) {  }
                 
                 SingleMaskFilter_t(uint32_t id_mask, bool ide_mask, bool rtr_mask) :
-                                   rtr_mask(rtr_mask), ide_mask(ide_mask), id_mask(id_mask) {  }
+                                   __a(0), rtr_mask(rtr_mask), ide_mask(ide_mask), id_mask(id_mask) {  }
             };
             
             struct DualIDFilter_t {
