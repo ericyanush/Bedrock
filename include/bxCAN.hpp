@@ -240,6 +240,16 @@ namespace Bedrock {
                 FMR ^= 0x1; // Clear the FINIT bit
             }
             
+            /**
+             Get the configured fifo for a filter bank
+             
+             - Parameter filter: The filter index to retrieve the configured FIFO for
+             - Returns uint8_t: The FIFO index assigned to the filter bank
+             */
+            uint8_t getAssignedFIFOForFilter(uint8_t filter) {
+                return (FFA1R >> filter) & 0x1;
+            }
+            
             struct FilterBank {
                 dev_reg32_t FR1;
                 dev_reg32_t FR2;

@@ -702,6 +702,15 @@ TEST_F(CANTests, TestAssignFilterToFIFO) {
     }
 }
 
+TEST_F(CANTests, TestGetAssignedFIFO) {
+    for (uint8_t i = 0; i < 14; i++) {
+        can.filters.assignFilterToFIFO(i, 0);
+        ASSERT_EQ(0, can.filters.getAssignedFIFOForFilter(i));
+        can.filters.assignFilterToFIFO(i, 1);
+        ASSERT_EQ(1, can.filters.getAssignedFIFOForFilter(i));
+    }
+}
+
 TEST_F(CANTests, TestConfigureSingleMaskFilter) {
     using Filters = bxCAN::Filters;
     Filters::SingleIDFilter_t id{0};
