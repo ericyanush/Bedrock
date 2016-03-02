@@ -208,7 +208,7 @@ namespace Bedrock {
         }
         
     };
-    
+    using SPIProvider = SPI& (*)(void);
 }
 
 #endif /* SPI_h */
