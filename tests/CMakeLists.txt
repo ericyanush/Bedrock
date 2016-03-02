@@ -18,7 +18,8 @@ set(BEDROCK_TEST_SRCS src/main.cpp
                       src/InterruptManagerTests.cpp
                       src/SysConfigTests.cpp
                       src/GPTimerTests.cpp
-                      src/DelayTests.cpp)
+                      src/DelayTests.cpp
+                      src/SPITests.cpp)
 
 set(BEDROCK_SRCS ../src/InterruptManager.cpp
                  ../src/Delay.cpp)
