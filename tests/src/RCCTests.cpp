@@ -48,6 +48,16 @@ TEST_F(RCCTest, TestRCCRegLayout) {
     ASSERT_EQ(offsetof(RCC, CFG3), 0x30);
 }
 
+TEST_F(RCCTest, TestEnableDMAClocks)
+{
+    rcc.enableDMA1();
+    ASSERT_EQ(ENABLE << 0, rcc.AHBENR);
+    rcc.AHBENR = 0;
+    
+    rcc.enableDMA2();
+    ASSERT_EQ(ENABLE << 1, rcc.AHBENR);
+}
+
 TEST_F(RCCTest, TestEnableGPIOPortClocks) {
     
     rcc.AHBENR = DISABLE;
@@ -83,15 +93,63 @@ TEST_F(RCCTest, TestEnableGPIOPortClocks) {
     ASSERT_EQ((ENABLE<<16), rcc.AHBENR);
 }
 
+TEST_F(RCCTest, TestEnableCRCClock)
+{
+    rcc.enableCRC();
+    ASSERT_EQ(ENABLE << 6, rcc.AHBENR);
+}
+
+TEST_F(RCCTest, TestEnableTimer1Clock)
+{
+    rcc.enableTimer1();
+    ASSERT_EQ(ENABLE << 11, rcc.APB2ENR);
+}
+
+TEST_F(RCCTest, TestEnableSPI1Clock)
+{
+    rcc.enableSPI1();
+    ASSERT_EQ(ENABLE << 12, rcc.APB2ENR);
+}
+TEST_F(RCCTest, TestEnableSPI4Clock)
+{
+    rcc.enableSPI4();
+    ASSERT_EQ(ENABLE << 15, rcc.APB2ENR);
+}
+
+TEST_F(RCCTest, TestEnableTimer2Clock)
+{
+    rcc.enableTimer2();
+    ASSERT_EQ(ENABLE << 0, rcc.APB1ENR);
+}
+
+TEST_F(RCCTest, TestEnableTimer3Clock)
+{
+    rcc.enableTimer3();
+    ASSERT_EQ(ENABLE << 1, rcc.APB1ENR);
+}
+
+TEST_F(RCCTest, TestEnableTimer4Clock)
+{
+    rcc.enableTimer4();
+    ASSERT_EQ(ENABLE << 2, rcc.APB1ENR);
+}
+
+TEST_F(RCCTest, TestEnableSPI2Clock)
+{
+    rcc.enableSPI2();
+    ASSERT_EQ(ENABLE << 14, rcc.APB1ENR);
+}
+
+TEST_F(RCCTest, TestEnableSPI3Clock)
+{
+    rcc.enableSPI3();
+    ASSERT_EQ(ENABLE << 15, rcc.APB1ENR);
+}
+
 TEST_F(RCCTest, TestEnableCANClock) {
     rcc.APB1ENR = DISABLE;
     rcc.enableCAN();
     ASSERT_EQ((ENABLE<<25), rcc.APB1ENR);
-}
-
-TEST_F(RCCTest, TestEnableTimer2Clock) {
-    rcc.enableTimer2();
-    ASSERT_TRUE((rcc.APB1ENR & 0x1) == 0x1);
 }
 
 TEST_F(RCCTest, TestInit) {

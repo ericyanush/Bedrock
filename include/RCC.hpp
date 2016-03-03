@@ -126,44 +126,104 @@ namespace Bedrock {
             while(!((CFG & (0b11 << 2)) == (static_cast<uint32_t>(SysClockSource::PLL) << 2)));
         }
         
-        void enableGPIOA() {
+        void enableDMA1()
+        {
+            AHBENR |= ENABLE << 0;
+        }
+        
+        void enableDMA2()
+        {
+            AHBENR |= ENABLE << 1;
+        }
+        
+        void enableGPIOA()
+        {
             AHBENR |= (ENABLE << 17);
         }
         
-        void enableGPIOB() {
+        void enableGPIOB()
+        {
             AHBENR |= (ENABLE << 18);
         }
         
-        void enableGPIOC() {
+        void enableGPIOC()
+        {
             AHBENR |= (ENABLE << 19);
         }
         
-        void enableGPIOD() {
+        void enableGPIOD()
+        {
             AHBENR |= (ENABLE << 20);
         }
         
-        void enableGPIOE() {
+        void enableGPIOE()
+        {
             AHBENR |= (ENABLE << 21);
         }
         
-        void enableGPIOF() {
+        void enableGPIOF()
+        {
             AHBENR |= (ENABLE << 22);
         }
         
-        void enableGPIOG() {
+        void enableGPIOG()
+        {
             AHBENR |= (ENABLE << 23);
         }
         
-        void enableGPIOH() {
+        void enableGPIOH()
+        {
             AHBENR |= (ENABLE << 16);
         }
         
-        void enableCAN() {
-            APB1ENR |= (ENABLE << 25);
+        void enableCRC()
+        {
+            AHBENR |= ENABLE << 6;
         }
         
-        void enableTimer2() {
+        void enableTimer1()
+        {
+            APB2ENR |= ENABLE << 11;
+        }
+        
+        void enableSPI1()
+        {
+            APB2ENR |= ENABLE << 12;
+        }
+        
+        void enableSPI4()
+        {
+            APB2ENR |= ENABLE << 15;
+        }
+        
+        void enableTimer2()
+        {
             APB1ENR |= (ENABLE << 0);
+        }
+        
+        void enableTimer3()
+        {
+            APB1ENR |= ENABLE << 1;
+        }
+        
+        void enableTimer4()
+        {
+            APB1ENR |= ENABLE << 2;
+        }
+        
+        void enableSPI2()
+        {
+            APB1ENR |= ENABLE << 14;
+        }
+        
+        void enableSPI3()
+        {
+            APB1ENR |= ENABLE << 15;
+        }
+        
+        void enableCAN()
+        {
+            APB1ENR |= (ENABLE << 25);
         }
         
         dev_reg32_t CR;
