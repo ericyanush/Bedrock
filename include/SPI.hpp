@@ -56,6 +56,24 @@ namespace Bedrock {
             CR1 |= ENABLE << 8;
         }
         
+        enum class RXThreshold
+        {
+            bits_16 = 0,
+            bits_8  = 1
+        };
+        
+        void setRXFIFOThreshold(RXThreshold thresh)
+        {
+            if (thresh == RXThreshold::bits_16)
+            {
+                CR2 &= ~(ENABLE << 12);
+            }
+            else
+            {
+                CR2 |= ENABLE << 12;
+            }
+        }
+        
         enum class FrameFormat {
             MSBFirst = 0,
             LSBFirst = 1
@@ -73,6 +91,16 @@ namespace Bedrock {
         FrameFormat getFrameFormat() {
             uint8_t f = (CR1 >> 7) & 0x1;
             return static_cast<FrameFormat>(f);
+        }
+        
+        void enableMultiMasterMode()
+        {
+            CR2 &= ~(ENABLE << 2);
+        }
+        
+        void disableMultiMasterMode()
+        {
+            CR2 |= ENABLE << 2;
         }
         
         void enable() {
