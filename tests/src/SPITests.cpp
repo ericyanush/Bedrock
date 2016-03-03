@@ -38,6 +38,33 @@ TEST_F(SPITests, TestRegisterLayout)
     ASSERT_EQ(0x24, sizeof(Bedrock::SPI));
 }
 
+TEST_F(SPITests, TestEnableSoftwareSlaveManagement)
+{
+    spi.enableSoftareSlaveManagement();
+    ASSERT_EQ(0x1 << 9, spi.CR1);
+}
+
+TEST_F(SPITests, TestDisableSoftwareSlaveManagement)
+{
+    spi.CR1 |= 0x1 << 9;
+    spi.disableSoftwareSlaveManagement();
+    ASSERT_EQ(0, spi.CR1);
+}
+
+TEST_F(SPITests, TestSelectSlave)
+{
+    spi.CR1 |= 0x1 << 8; //Slave is active LOW (idles high)
+    spi.selectSlave();
+    ASSERT_EQ(0, spi.CR1);
+}
+
+TEST_F(SPITests, TestDeselectSlave)
+{
+    spi.CR1 = 0; //Slave is active LOW (idles high)
+    spi.deselectSlave();
+    ASSERT_EQ(0x1 << 8, spi.CR1);
+}
+
 TEST_F(SPITests, TestSetFrameFormat)
 {
     spi.setFrameFormat(Bedrock::SPI::FrameFormat::LSBFirst);

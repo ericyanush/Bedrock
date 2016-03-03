@@ -34,6 +34,28 @@ namespace Bedrock {
         dev_reg16_t I2SPR;
         dev_reg16_t __pad9; //anonymous padding
         
+        void enableSoftareSlaveManagement()
+        {
+            CR1 |= ENABLE << 9;
+        }
+        
+        void disableSoftwareSlaveManagement()
+        {
+            CR1 &= ~(ENABLE << 9);
+        }
+        
+        void selectSlave()
+        {
+            //Note SS is active LOW
+            CR1 &= ~(ENABLE << 8);
+        }
+        
+        void deselectSlave()
+        {
+            //Note SS is active LOW
+            CR1 |= ENABLE << 8;
+        }
+        
         enum class FrameFormat {
             MSBFirst = 0,
             LSBFirst = 1
