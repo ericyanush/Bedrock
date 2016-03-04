@@ -128,12 +128,26 @@ protected:
  GPIO::GPIOPort GPIOPinTest::testPort;
 
 
-TEST_F(GPIOPinTest, TestSetAlternateFunction) {
-    five.setAlternateFunction(GPIO::AlternateFunction::AF11);
-    ASSERT_EQ(GPIO::AlternateFunction::AF11, static_cast<GPIO::AlternateFunction>((testPort.AFL >> 20) & 0xF));
+TEST_F(GPIOPinTest, TestSetAlternateFunction)
+{
+    using AltFunc = Bedrock::GPIO::AlternateFunction;
     
-    eleven.setAlternateFunction(GPIO::AlternateFunction::AF8);
-    ASSERT_EQ(GPIO::AlternateFunction::AF8, static_cast<GPIO::AlternateFunction>((testPort.AFH >> 12) & 0xF));
+    five.setAlternateFunction(AltFunc::AF11);
+    ASSERT_EQ(AltFunc::AF11, static_cast<AltFunc>((testPort.AFL >> 20) & 0xF));
+    
+    eleven.setAlternateFunction(AltFunc::AF8);
+    ASSERT_EQ(AltFunc::AF8, static_cast<AltFunc>((testPort.AFH >> 12) & 0xF));
+}
+
+TEST_F(GPIOPinTest, TestGetAlternateFunction)
+{
+    using AltFunc = Bedrock::GPIO::AlternateFunction;
+    
+    two.setAlternateFunction(AltFunc::AF6);
+    ASSERT_EQ(AltFunc::AF6, two.getAlternateFunction());
+    
+    fourteen.setAlternateFunction(AltFunc::AF3);
+    ASSERT_EQ(AltFunc::AF3, fourteen.getAlternateFunction());
 }
 
 TEST_F(GPIOPinTest, TestSetMode) {
@@ -162,6 +176,17 @@ TEST_F(GPIOPinTest, TestSetMode) {
     ASSERT_EQ(static_cast<uint32_t>(GPIO::PinMode::analog) << 30, testPort.MODE);
 }
 
+TEST_F(GPIOPinTest, TestGetMode)
+{
+    using Mode = Bedrock::GPIO::PinMode;
+    
+    four.setMode(Mode::output);
+    ASSERT_EQ(Mode::output, four.getMode());
+    
+    thirteen.setMode(Mode::alternateFunc);
+    ASSERT_EQ(Mode::alternateFunc, thirteen.getMode());
+}
+
 TEST_F(GPIOPinTest, TestSetOutputSpeed) {
     testPort.OSPEED = 0;
     zero.setOutSpeed(GPIO::OutputSpeed::medium);
@@ -184,6 +209,17 @@ TEST_F(GPIOPinTest, TestSetOutputSpeed) {
     testPort.OSPEED = 0;
     fifteen.setOutSpeed(GPIO::OutputSpeed::high);
     ASSERT_EQ(static_cast<uint32_t>(GPIO::OutputSpeed::high) << 30, testPort.OSPEED);
+}
+
+TEST_F(GPIOPinTest, TestGetOutputSpeed)
+{
+    using OutSpeed = Bedrock::GPIO::OutputSpeed;
+    
+    five.setOutSpeed(OutSpeed::medium);
+    ASSERT_EQ(OutSpeed::medium, five.getOutSpeed());
+    
+    nine.setOutSpeed(OutSpeed::high);
+    ASSERT_EQ(OutSpeed::high, nine.getOutSpeed());
 }
 
 TEST_F(GPIOPinTest, TestSetOutputType) {
@@ -210,6 +246,17 @@ TEST_F(GPIOPinTest, TestSetOutputType) {
     ASSERT_EQ(static_cast<uint32_t>(GPIO::OutputType::opendrain) << 15, testPort.OTYPE);
 }
 
+TEST_F(GPIOPinTest, TestGetOutputType)
+{
+    using OutType = Bedrock::GPIO::OutputType;
+    
+    three.setOutputType(OutType::pushpull);
+    ASSERT_EQ(OutType::pushpull, three.getOutputType());
+    
+    fifteen.setOutputType(OutType::opendrain);
+    ASSERT_EQ(OutType::opendrain, fifteen.getOutputType());
+}
+
 TEST_F(GPIOPinTest, TestSetPullType) {
     testPort.PUPD = 0;
     zero.setPullType(GPIO::IOPullType::down);
@@ -232,6 +279,20 @@ TEST_F(GPIOPinTest, TestSetPullType) {
     testPort.PUPD = 0;
     fifteen.setPullType(GPIO::IOPullType::down);
     ASSERT_EQ(static_cast<uint32_t>(GPIO::IOPullType::down) << 30, testPort.PUPD);
+}
+
+TEST_F(GPIOPinTest, TestGetPullType)
+{
+    using Pull = Bedrock::GPIO::IOPullType;
+    
+    two.setPullType(Pull::up);
+    ASSERT_EQ(Pull::up, two.getPullType());
+    
+    eleven.setPullType(Pull::down);
+    ASSERT_EQ(Pull::down, eleven.getPullType());
+    
+    eight.setPullType(Pull::none);
+    ASSERT_EQ(Pull::none, eight.getPullType());
 }
 
 TEST_F(GPIOPinTest, TestSetOn) {
