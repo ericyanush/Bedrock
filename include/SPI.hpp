@@ -276,6 +276,30 @@ namespace Bedrock {
             return (SR >> 0) & 0x1;
         }
         
+        void write8Bits(uint8_t data)
+        {
+            //Data must be written right aligned, and we must do 8bit aligned
+            //  accesses
+            reinterpret_cast<dev_reg8_t*>(&DR)[1] = data;
+        }
+        
+        void write16Bits(uint16_t data)
+        {
+            DR = data;
+        }
+        
+        uint8_t read8Bits()
+        {
+            //Data is right aligned, and must be done with
+            // an 8bit aligned access
+            return reinterpret_cast<dev_reg8_t*>(&DR)[1];
+        }
+        
+        uint16_t read16Bits()
+        {
+            return DR;
+        }
+        
     };
     using SPIProvider = SPI& (*)(void);
 }

@@ -343,3 +343,29 @@ TEST_F(SPITests, TestRXNotEmpty)
     spi.SR = 0x1;
     ASSERT_TRUE(spi.rxNotEmpty());
 }
+
+TEST_F(SPITests, TestWrite8Bits)
+{
+    spi.DR = 0xFFFF;
+    spi.write8Bits(0xBB);
+    ASSERT_EQ(0xBBFF, spi.DR); //BB should be in the LSB (right aligned)
+}
+
+TEST_F(SPITests, TestWrite16Bits)
+{
+    spi.DR = 0xFFFF;
+    spi.write16Bits(0xAABB);
+    ASSERT_EQ(0xAABB, spi.DR);
+}
+
+TEST_F(SPITests, TestRead8Bits)
+{
+    spi.DR = 0xAABB;
+    ASSERT_EQ(0xAA, spi.read8Bits());
+}
+
+TEST_F(SPITests, TestRead16Bits)
+{
+    spi.DR = 0xCCAA;
+    ASSERT_EQ(0xCCAA, spi.read16Bits());
+}
