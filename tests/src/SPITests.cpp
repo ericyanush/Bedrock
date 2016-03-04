@@ -255,6 +255,28 @@ TEST_F(SPITests, TestDisableErrorInterrupt)
     ASSERT_EQ(0x0, spi.CR2 & (0x1 << 5));
 }
 
+TEST_F(SPITests, TestEnableSingleMasterMode)
+{
+    spi.enableSingleMasterMode();
+    ASSERT_EQ(0x1 << 2, spi.CR2 & (0x1 << 2));
+}
+
+TEST_F(SPITests, TestDisableSingleMasterMode)
+{
+    spi.CR2 |= (0x1 << 2); //Set single Master mode enable bit
+    spi.disableSingleMasterMode();
+    ASSERT_EQ(0, spi.CR2 & (0x1 << 2));
+}
+
+TEST_F(SPITests, TestIsSingleMasterModeEnabled)
+{
+    ASSERT_FALSE(spi.isSingleMasterModeEnabled());
+    spi.enableSingleMasterMode();
+    ASSERT_TRUE(spi.isSingleMasterModeEnabled());
+    spi.disableSingleMasterMode();
+    ASSERT_FALSE(spi.isSingleMasterModeEnabled());
+}
+
 TEST_F(SPITests, TestEnableTXDMA)
 {
     spi.enableTXDMA();

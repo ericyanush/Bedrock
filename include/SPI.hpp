@@ -220,6 +220,21 @@ namespace Bedrock {
             CR2 &= ~(ENABLE << 5);
         }
         
+        void enableSingleMasterMode()
+        {
+            CR2 |= ENABLE << 2;
+        }
+        
+        void disableSingleMasterMode()
+        {
+            CR2 &= ~(ENABLE << 2);
+        }
+        
+        bool isSingleMasterModeEnabled()
+        {
+            return (CR2 & (ENABLE << 2)) != 0;
+        }
+        
         void enableTXDMA() {
             CR2 |= ENABLE << 1;
         }
