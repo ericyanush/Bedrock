@@ -44,6 +44,11 @@ namespace Bedrock {
             CR1 &= ~(ENABLE << 9);
         }
         
+        bool softwareSlaveManagementEnabled()
+        {
+            return (CR1 >> 9) & 0x1;
+        }
+        
         void selectSlave()
         {
             //Note SS is active LOW
@@ -74,6 +79,11 @@ namespace Bedrock {
             }
         }
         
+        RXThreshold getRXFIFOThreshold()
+        {
+            return static_cast<RXThreshold>((CR2 >> 12) & 0x1);
+        }
+        
         enum class FrameFormat {
             MSBFirst = 0,
             LSBFirst = 1
@@ -93,21 +103,15 @@ namespace Bedrock {
             return static_cast<FrameFormat>(f);
         }
         
-        void enableMultiMasterMode()
-        {
-            CR2 &= ~(ENABLE << 2);
-        }
-        
-        void disableMultiMasterMode()
-        {
-            CR2 |= ENABLE << 2;
-        }
-        
         void enable() {
             CR1 |= (ENABLE << 6);
         }
         void disable() {
             CR1 &= ~(ENABLE << 6);
+        }
+        bool isEnabled()
+        {
+            return (CR1 & (ENABLE << 6)) != 0;
         }
         
         enum class BaudRatePrescaler

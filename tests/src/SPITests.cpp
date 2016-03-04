@@ -51,6 +51,13 @@ TEST_F(SPITests, TestDisableSoftwareSlaveManagement)
     ASSERT_EQ(0, spi.CR1);
 }
 
+TEST_F(SPITests, TestSoftwareSlaveManagementEnabled)
+{
+    ASSERT_FALSE(spi.softwareSlaveManagementEnabled());
+    spi.enableSoftareSlaveManagement();
+    ASSERT_TRUE(spi.softwareSlaveManagementEnabled());
+}
+
 TEST_F(SPITests, TestSelectSlave)
 {
     spi.CR1 |= 0x1 << 8; //Slave is active LOW (idles high)
@@ -63,6 +70,28 @@ TEST_F(SPITests, TestDeselectSlave)
     spi.CR1 = 0; //Slave is active LOW (idles high)
     spi.deselectSlave();
     ASSERT_EQ(0x1 << 8, spi.CR1);
+}
+
+TEST_F(SPITests, TestSetRXFIFOThreshold)
+{
+    using RXThres = Bedrock::SPI::RXThreshold;
+    
+    spi.setRXFIFOThreshold(RXThres::bits_8);
+    ASSERT_EQ(0x1 << 12, spi.CR2 & (0x1 <<12));
+    
+    spi.setRXFIFOThreshold(RXThres::bits_16);
+    ASSERT_EQ(0, spi.CR2 & (0x1 << 12));
+}
+
+TEST_F(SPITests, TestGetRXFIFThreshold)
+{
+    using RXThres = Bedrock::SPI::RXThreshold;
+    
+    spi.setRXFIFOThreshold(RXThres::bits_8);
+    ASSERT_EQ(RXThres::bits_8, spi.getRXFIFOThreshold());
+    
+    spi.setRXFIFOThreshold(RXThres::bits_16);
+    ASSERT_EQ(RXThres::bits_16, spi.getRXFIFOThreshold());
 }
 
 TEST_F(SPITests, TestSetFrameFormat)
@@ -96,6 +125,15 @@ TEST_F(SPITests, TestDisable)
     spi.disable();
     
     ASSERT_EQ(0, spi.CR1);
+}
+
+TEST_F(SPITests, TestIsEnabled)
+{
+    ASSERT_FALSE(spi.isEnabled());
+    spi.enable();
+    ASSERT_TRUE(spi.isEnabled());
+    spi.disable();
+    ASSERT_FALSE(spi.isEnabled());
 }
 
 TEST_F(SPITests, TestSetPrescaler)
