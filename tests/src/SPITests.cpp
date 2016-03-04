@@ -361,7 +361,7 @@ TEST_F(SPITests, TestWrite16Bits)
 TEST_F(SPITests, TestRead8Bits)
 {
     spi.DR = 0xAABB;
-    ASSERT_EQ(0xAA, spi.read8Bits());
+    ASSERT_EQ(0xBB, spi.read8Bits());
 }
 
 TEST_F(SPITests, TestRead16Bits)

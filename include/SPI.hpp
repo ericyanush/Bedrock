@@ -292,7 +292,7 @@ namespace Bedrock {
         {
             //Data is right aligned, and must be done with
             // an 8bit aligned access
-            return reinterpret_cast<dev_reg8_t*>(&DR)[1];
+            return reinterpret_cast<dev_reg8_t*>(&DR)[0];
         }
         
         uint16_t read16Bits()
