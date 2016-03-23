@@ -530,7 +530,8 @@ namespace Bedrock {
                     idr |= 0x2; //Set the RTR bit
                 }
                 idr |= 0x1; //Set the TXRQ bit
-                //Set the DLC
+                //Clear and Set the DLC
+                txMailbox[targetMB].TDTR &= ~(0xF);
                 txMailbox[targetMB].TDTR |= (msg.dataLen & 0xF); //DLC is 4 bits wide
                 //Copy data into data registers
                 txMailbox[targetMB].TDLR = msg.data[0] | (msg.data[1] << 8) |

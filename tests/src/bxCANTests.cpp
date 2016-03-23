@@ -354,6 +354,7 @@ TEST_F(CANTests, TestTransmitMessage) {
     
     //Set mb 0 empty
     can.TSR = 0x1 << 26;
+    can.txMailbox[0].TDTR |= 7; //Leave an erroneous value in the DLC data register
     testMessage.type = CANMessage::Type::Remote; // Try sending a remote frame
     testMessage.format = CANMessage::Format::Standard; // with a standard ID
     testMessage.dataLen = 3; //With only 3 data bytes
