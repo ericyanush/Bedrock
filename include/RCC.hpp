@@ -126,6 +126,54 @@ namespace Bedrock {
             while(!((CFG & (0b11 << 2)) == (static_cast<uint32_t>(SysClockSource::PLL) << 2)));
         }
         
+        enum class MCO_Source : uint8_t
+        {
+            Disabled = 0b000,
+            LSI      = 0b010,
+            LSE      = 0b011,
+            SysClock = 0b100,
+            HSI      = 0b101,
+            HSE      = 0b110,
+            PLL      = 0b111
+        };
+        
+        void setMCOClockSource(MCO_Source source)
+        {
+            //clear the current value
+            CFG &= ~(0b111 << 24);
+            //update the new value
+            CFG |= static_cast<uint32_t>(source) << 24;
+        }
+        
+        MCO_Source getMCOClockSource()
+        {
+            return static_cast<MCO_Source>((CFG >> 24) & 0b111);
+        }
+        
+        enum class MCO_Prescale : uint8_t
+        {
+            Div1   = 0b000,
+            Div2   = 0b001,
+            Div4   = 0b010,
+            Div8   = 0b011,
+            Div16  = 0b100,
+            Div32  = 0b101,
+            Div64  = 0b110,
+            Div128 = 0b111
+        };
+        
+        void setMCOPrescale(MCO_Prescale pre)
+        {
+            //Clear the current value
+            CFG &= ~(0b111 << 28);
+            CFG |= static_cast<uint32_t>(pre) << 28;
+        }
+        
+        MCO_Prescale getMCOPrescale()
+        {
+            return static_cast<MCO_Prescale>((CFG >> 28) & 0b111);
+        }
+        
         void enableDMA1()
         {
             AHBENR |= ENABLE << 0;
