@@ -259,6 +259,16 @@ namespace Bedrock {
             APB1ENR |= ENABLE << 2;
         }
         
+        void enableTimer6()
+        {
+            APB1ENR |= ENABLE << 4;
+        }
+        
+        void enableTimer7()
+        {
+            APB1ENR |= ENABLE << 5;
+        }
+        
         void enableSPI2()
         {
             APB1ENR |= ENABLE << 14;
