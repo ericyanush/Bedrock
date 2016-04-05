@@ -89,6 +89,32 @@ namespace Bedrock {
             CCMR[regIndex] |= static_cast<uint8_t>(sel) << bitOffset;
         }
         
+        enum class OutputCompareMode : uint8_t
+        {
+            Frozen        = 0b000,
+            MatchActive   = 0b001,
+            MatchInactive = 0b010,
+            Toggle        = 0b011,
+            ForceInactive = 0b100,
+            ForceActive   = 0b101,
+            PWMMode1      = 0b110,
+            PWMMode2      = 0b111
+        };
+        
+        void setOuputCompareMode(uint8_t channel, OutputCompareMode mode)
+        {
+            uint8_t regIndex = channel/3;
+            uint8_t bitOffset = (((channel - 1) % 2) * 8) + 4;
+            
+            CCMR[regIndex] &= ~(0b111 << bitOffset);
+            CCMR[regIndex] |= static_cast<uint8_t>(mode) << bitOffset;
+        }
+        
+        void setCapCompVal(uint8_t channel, width_t val)
+        {
+            CCR[channel - 1] = val;
+        }
+        
         void enableCapCompChannel(uint8_t channel)
         {
             uint8_t bitOffset = (channel - 1) * 4;
